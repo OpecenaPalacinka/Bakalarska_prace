@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">pelikanj</string>
+    <string name="title_scanner">Čtečka</string>
+    <string name="title_profile">Profil</string>
+    <string name="title_more">Více</string>
+    <string name="title_institutions">Instituce</string>
+</resources>
