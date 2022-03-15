@@ -7,27 +7,28 @@
 
     <fragment
         android:id="@+id/navigation_scanner"
-        android:name="pelikan.bp.pelikanj.ui.scanner.HomeFragment"
+        android:name="pelikan.bp.pelikanj.ui.scanner.ScannerFragment"
         android:label="@string/title_scanner"
         tools:layout="@layout/fragment_scanner" />
 
+    <!-- label -> nápis nahoře, nápis dole udělám v bottom_nav_menu.xml -->
+    <fragment
+        android:id="@+id/navigation_institutions"
+        android:name="pelikan.bp.pelikanj.ui.institutions.InstitutionsFragment"
+        android:label="Seznam institucí"
+        tools:layout="@layout/institutions_fragment" />
+
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="pelikan.bp.pelikanj.ui.profile.DashboardFragment"
+        android:name="pelikan.bp.pelikanj.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_profile" />
 
     <fragment
         android:id="@+id/navigation_more"
-        android:name="pelikan.bp.pelikanj.ui.more.NotificationsFragment"
+        android:name="pelikan.bp.pelikanj.ui.more.MoreFragment"
         android:label="@string/title_more"
         tools:layout="@layout/fragment_more" />
 
-    <!-- label -> nápis nahoře, nápis dole udělám v bottom_nav_menu.xml -->
-    <fragment
-        android:id="@+id/navigation_institutions"
-        android:name="pelikan.bp.pelikanj.ui.institutions.institutions"
-        android:label="@string/title_institutions"
-        tools:layout="@layout/institutions_fragment" />
 
 </navigation>

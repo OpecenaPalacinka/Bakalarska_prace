@@ -3,24 +3,22 @@
 
     <item
         android:id="@+id/navigation_scanner"
-        android:icon="@drawable/ic_home_black_24dp"
+        android:icon="@drawable/ic_baseline_qr_code_scanner_24"
         android:title="@string/title_scanner" />
 
     <item
         android:id="@+id/navigation_institutions"
-        android:icon="@drawable/ic_notifications_black_24dp"
+        android:icon="@drawable/ic_baseline_location_city_24"
         android:title="@string/title_institutions" />
 
     <item
         android:id="@+id/navigation_profile"
-        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:icon="@drawable/ic_baseline_account_circle_24"
         android:title="@string/title_profile" />
 
     <item
         android:id="@+id/navigation_more"
-        android:icon="@drawable/ic_notifications_black_24dp"
+        android:icon="@drawable/ic_baseline_more_horiz_24"
         android:title="@string/title_more" />
-
-
 
 </menu>

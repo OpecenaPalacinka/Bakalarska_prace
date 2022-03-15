@@ -1,13 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.institutions.institutions">
+    tools:context=".ui.institutions.InstitutionsFragment"
+    android:layout_marginBottom="?attr/actionBarSize"
+    >
 
-    <TextView
+    <ListView
+        android:id="@+id/institutions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Hello Wolrd" />
+        android:contentDescription="@string/list_of_institutions"
+        />
 
-</FrameLayout>
+    <FrameLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintStart_toStartOf="@id/institutions"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/building"
+            android:paddingTop="20dp"
+            android:paddingStart="4dp"
+            android:background="@android:color/transparent"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="3dp"
+                android:paddingLeft="3dp"
+                android:textSize="12dp"
+                android:textColor="#808080"/>
+
+            <TextView
+                android:id="@+id/institution_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="19dp"
+                android:textColor="#808080"/>
+        </LinearLayout>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

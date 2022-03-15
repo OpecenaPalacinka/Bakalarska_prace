@@ -16,6 +16,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Hides top bar title
+        //supportActionBar?.hide()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -26,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_scanner, R.id.navigation_profile, R.id.navigation_more
+                R.id.navigation_scanner, R.id.navigation_profile, R.id.navigation_more, R.id.navigation_institutions
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)

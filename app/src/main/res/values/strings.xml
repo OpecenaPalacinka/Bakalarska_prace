@@ -4,4 +4,13 @@
     <string name="title_profile">Profil</string>
     <string name="title_more">Více</string>
     <string name="title_institutions">Instituce</string>
+    <string name="prompt_username">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="register">Register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="login_baner">Přihlašení</string>
+    <string name="building">building</string>
+    <string name="list_of_institutions">List of institutions</string>
 </resources>
