@@ -6,10 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".ui.institutions.InstitutionsFragment"
     android:layout_marginBottom="?attr/actionBarSize"
-    >
+    android:id="@+id/institutions_fragment">
 
     <ListView
         android:id="@+id/institutions"
+        android:elevation="0dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/list_of_institutions"
@@ -17,6 +18,7 @@
 
     <FrameLayout
         android:id="@+id/linearLayout"
+        android:elevation="0dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="10dp"
@@ -43,17 +45,27 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="3dp"
-                android:paddingLeft="3dp"
-                android:textSize="12dp"
+                android:paddingStart="3dp"
+                android:textSize="12sp"
                 android:textColor="#808080"/>
 
             <TextView
                 android:id="@+id/institution_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="19dp"
+                android:textSize="19sp"
                 android:textColor="#808080"/>
         </LinearLayout>
     </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/overbox"
+        android:elevation="0dp"
+        android:background="@drawable/overbox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent">
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
