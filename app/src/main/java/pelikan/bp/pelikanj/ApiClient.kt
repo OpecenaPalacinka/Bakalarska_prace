@@ -1,0 +1,55 @@
+package pelikan.bp.pelikanj
+
+import okhttp3.ResponseBody
+import pelikan.bp.pelikanj.viewModels.*
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
+
+interface ApiClient {
+
+    @GET("/institutions")
+    fun getInstitutions(): Call<List<InstitutionsModelItem>>
+
+    @GET("/institutions_images/{imageName}")
+    fun getImage(@Path("imageName") imageName: String): Call<ResponseBody>
+
+    @GET("/exhibits/all/{institutionId}")
+    fun getAllExhibitsOfInstitution(@Path("institutionId") id: Int): Call<String>
+
+    @POST("/exhibits/{institutionId}")
+    fun uploadNewExhibitWithExhibitImage(@Path("institutionId") id: Int,
+                         @Body exhibit: ExhibitItemWithExhibitImage): Call<ResponseBody>
+
+    @POST("/exhibits/{institutionId}")
+    fun uploadNewExhibit(@Path("institutionId") id: Int,
+                         @Body exhibit: ExhibitItemWithoutExhibitImage): Call<ResponseBody>
+
+    @POST("/users/register")
+    fun registerUser(@Body user: User): Call<ResponseBody>
+
+    @POST("/users/login")
+    fun loginUser(@Body user: UserLogin): Call<TokenModel>
+
+
+    companion object {
+
+        private const val BASE_URL = "https://bp-web.herokuapp.com/"
+        private const val PHONE_URL_TEST = "http://192.168.0.15:8080/" // my PC IP address
+        private const val LOCALHOST_URL = "http://10.0.2.2:8080/"
+
+        fun create() : ApiClient {
+
+            val retrofit = Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(LOCALHOST_URL)
+                .build()
+            return retrofit.create(ApiClient::class.java)
+
+        }
+    }
+}

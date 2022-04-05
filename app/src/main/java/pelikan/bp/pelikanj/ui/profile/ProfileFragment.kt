@@ -1,19 +1,32 @@
 package pelikan.bp.pelikanj.ui.profile
 
-import android.content.Intent
-import android.net.Uri
+import android.animation.Animator
+import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Toast
+import android.view.WindowManager
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
+import android.widget.*
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.android.synthetic.main.fragment_profile.*
+import pelikan.bp.pelikanj.ApiClient
 import pelikan.bp.pelikanj.R
+import pelikan.bp.pelikanj.viewModels.TokenModel
+import pelikan.bp.pelikanj.viewModels.UserLogin
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
 
 class ProfileFragment : Fragment() {
 
@@ -24,8 +37,21 @@ class ProfileFragment : Fragment() {
     lateinit var buttonRegister: Button
     lateinit var buttonLogin: Button
 
+    lateinit var animationF: LottieAnimationView
+    lateinit var frameLayout: FrameLayout
+    lateinit var fromsmall: Animation
+    lateinit var fromnothing: Animation
+    lateinit var foricon: Animation
+    lateinit var overbox: LinearLayout
+    lateinit var cardF: LinearLayout
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_profile, container, false)
+
+        frameLayout = view.findViewById(R.id.profile_fragment)
+
+        frameLayout.addView(inflater.inflate(R.layout.animation_failed,null))
 
         return view
     }
@@ -36,9 +62,11 @@ class ProfileFragment : Fragment() {
 
         initForm(view)
 
+        setUpAnimation()
+
         buttonLogin.setOnClickListener{
             if (checkValues()){
-                navControler?.navigate(R.id.action_navigation_profile_to_navigation_logged_user)
+                loginUser()
             }
         }
 
@@ -54,6 +82,94 @@ class ProfileFragment : Fragment() {
         passwordInput = view.findViewById(R.id.password)
         buttonRegister = view.findViewById(R.id.register_button)
         buttonLogin = view.findViewById(R.id.signin_button)
+
+        animationF = view.findViewById(R.id.animationFailed)
+        cardF = view.findViewById(R.id.popup_failed)
+
+        overbox = view.findViewById(R.id.overbox)
+
+        val animationTextF: TextView = view.findViewById(R.id.animation_failed_text)
+        animationTextF.text = resources.getString(R.string.login_failed)
+    }
+
+    private fun loginUser(){
+        val userN = usernameInput.editText?.text.toString()
+        val userP = passwordInput.editText?.text.toString()
+
+        val user = UserLogin(userN,userP)
+
+        val client: Call<TokenModel> = ApiClient.create().loginUser(user)
+
+        client.enqueue(object : Callback<TokenModel> {
+            override fun onResponse(
+                call: Call<TokenModel>,
+                response: Response<TokenModel>
+            ) {
+                if (response.code() == 200){
+                    // OK
+                    navControler?.navigate(R.id.action_navigation_profile_to_navigation_logged_user)
+                } else {
+                    // Wrong credentials
+                        doAnimationFailed()
+                    animationF.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {
+                            usernameInput.isFocusableInTouchMode = false
+                            usernameInput.isFocusable = false
+                            passwordInput.isFocusableInTouchMode = false
+                            passwordInput.isFocusable = false
+                        }
+
+                        override fun onAnimationEnd(animation: Animator) {
+                            usernameInput.editText?.text = Editable.Factory.getInstance().newEditable("")
+                            passwordInput.editText?.text = Editable.Factory.getInstance().newEditable("")
+
+                            usernameInput.isFocusableInTouchMode = true
+                            usernameInput.isFocusable = true
+                            passwordInput.isFocusableInTouchMode = true
+                            passwordInput.isFocusable = true
+                            passwordInput.clearFocus()
+
+                            setUpAnimation()
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator) {
+                        }
+                    })
+                }
+
+            }
+
+            override fun onFailure(call: Call<TokenModel>, t: Throwable) {
+                Log.println(Log.ERROR,tag,t.toString())
+            }
+        })
+    }
+
+    private fun doAnimationFailed() {
+        animationF.visibility = View.VISIBLE
+        animationF.startAnimation(foricon)
+        animationF.playAnimation()
+        animationF.repeatCount = 1
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        cardF.alpha = 1F
+        cardF.startAnimation(fromsmall)
+    }
+
+    private fun setUpAnimation() {
+        fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
+        fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
+        foricon = AnimationUtils.loadAnimation(context,R.anim.foricon)
+
+        cardF.alpha = 0F
+        overbox.alpha = 0F
+        animationF.visibility = View.GONE
+
     }
 
     private fun checkValues():Boolean {
@@ -68,7 +184,7 @@ class ProfileFragment : Fragment() {
         val usernameString: String = usernameInput.editText?.text.toString()
 
         if (usernameString.isEmpty()) {
-            usernameInput.error = resources.getString(R.string.requiredNameOfExhibit)
+            usernameInput.error = resources.getString(R.string.requiredUsername)
             return false
         } else if (usernameString.length > 30) {
             usernameInput.error = resources.getString(R.string.tooLong)
@@ -87,7 +203,7 @@ class ProfileFragment : Fragment() {
         val passwordString: String = passwordInput.editText?.text.toString()
 
         if (passwordString.isEmpty()) {
-            passwordInput.error = resources.getString(R.string.requiredNameOfExhibit)
+            passwordInput.error = resources.getString(R.string.requiredPassword)
             return false
         } else if (passwordString.length > 50) {
             passwordInput.error = resources.getString(R.string.tooLong)

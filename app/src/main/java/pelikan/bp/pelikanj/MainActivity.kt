@@ -1,13 +1,17 @@
 package pelikan.bp.pelikanj
 
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import okhttp3.OkHttpClient
 import pelikan.bp.pelikanj.databinding.ActivityMainBinding
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,9 +33,9 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_scanner, R.id.navigation_profile, R.id.navigation_more, R.id.navigation_institutions
-            )
-        )
+                R.id.navigation_scanner, R.id.navigation_profile, R.id.navigation_more, R.id.navigation_institutions,
+                R.id.navigation_pickExhibit
+        ))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }

@@ -6,7 +6,14 @@
     android:layout_height="match_parent"
     android:layout_marginBottom="?attr/actionBarSize"
     android:background="@drawable/background_small_small"
-    tools:context=".ui.more.SendExhibitFragment">
+    tools:context=".ui.more.SendExhibitFragment"
+    android:id="@+id/send_exhibit_scrollView"
+    >
+
+    <FrameLayout
+        android:id="@+id/send_exhibit_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -75,23 +82,28 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:id="@+id/institution_name"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="40dp"
-            android:hint="@string/image_with_exhibit_info_label"
+            android:background="@android:color/transparent"
             app:boxBackgroundColor="#d6d6d6"
-            app:startIconDrawable="@drawable/ic_baseline_folder_24">
+            app:startIconDrawable="@drawable/ic_baseline_location_city_24">
 
-            <com.google.android.material.textfield.TextInputEditText
+
+            <AutoCompleteTextView
+                android:id="@+id/autoComplete_institutions"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"
+                android:hint="@string/institution_name"/>
 
         </com.google.android.material.textfield.TextInputLayout>
-
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/building_number"
@@ -157,6 +169,88 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp">
+
+            <ImageView
+                android:id="@+id/imageView_info_label_image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:contentDescription="@string/image_with_exhibit_info_label"
+                android:src="@drawable/search_view_background"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/imageView_info_label_image"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_marginStart="20dp"
+                >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/image_with_exhibit_info_label" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/choose_info_label_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/choose_image" />
+
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp">
+
+            <ImageView
+                android:id="@+id/imageView_exhibit_image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:contentDescription="@string/image_with_exhibit_non_required"
+                android:src="@drawable/search_view_background"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/imageView_exhibit_image"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_marginStart="20dp"
+                >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/image_with_exhibit_non_required" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/choose_exhibit_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/choose_image" />
+
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -175,5 +269,18 @@
         </RelativeLayout>
 
     </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/overbox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/overbox"
+            android:elevation="0dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent">
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </ScrollView>

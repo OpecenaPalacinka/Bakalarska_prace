@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_institutions">
+    app:startDestination="@+id/navigation_scanner">
 
     <fragment
         android:id="@+id/navigation_scanner"
@@ -11,11 +11,17 @@
         android:label="@string/title_scanner_fragment"
         tools:layout="@layout/fragment_scanner" />
 
+    <fragment
+        android:id="@+id/navigation_pickExhibit"
+        android:name="pelikan.bp.pelikanj.ui.findExhibit.PickExhibitFragment"
+        android:label="@string/title_pick_exhibit_fragment"
+        tools:layout="@layout/fragment_pick_exhibit" />
+
     <!-- label -> nápis nahoře, nápis dole udělám v bottom_nav_menu.xml -->
     <fragment
         android:id="@+id/navigation_institutions"
         android:name="pelikan.bp.pelikanj.ui.institutions.InstitutionsFragment"
-        android:label="Seznam institucí"
+        android:label="@string/list_of_institutions"
         tools:layout="@layout/institutions_fragment" />
 
     <fragment
@@ -53,7 +59,13 @@
     <fragment
         android:id="@+id/language_settings"
         android:name="pelikan.bp.pelikanj.ui.more.languageSetting.LanguageSettingFragment"
-        android:label="Nastavení jazyka"
+        android:label="@string/language_settings"
+        tools:layout="@layout/fragment_language_setting" />
+
+    <fragment
+        android:id="@+id/change_password"
+        android:name="pelikan.bp.pelikanj.ui.profile.ChangePasswordFragment"
+        android:label="@string/change_password"
         tools:layout="@layout/fragment_language_setting" />
 
     <fragment
@@ -64,6 +76,12 @@
         <action
             android:id="@+id/action_navigation_logged_user_to_navigation_profile"
             app:destination="@id/navigation_profile" />
+        <action
+            android:id="@+id/action_navigation_logged_user_to_language_settings"
+            app:destination="@id/language_settings" />
+        <action
+            android:id="@+id/action_navigation_logged_user_to_change_password"
+            app:destination="@id/change_password" />
     </fragment>
 
     <fragment
@@ -73,6 +91,9 @@
         tools:layout="@layout/fragment_registration" >
         <action
             android:id="@+id/action_navigation_logged_user_to_navigation_profile"
+            app:destination="@id/navigation_profile" />
+        <action
+            android:id="@+id/action_navigation_registration_to_navigation_profile"
             app:destination="@id/navigation_profile" />
     </fragment>
 

@@ -1,65 +1,350 @@
 package pelikan.bp.pelikanj.ui.more
 
+import android.animation.Animator
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Toast
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.get
 import androidx.fragment.app.Fragment
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.android.synthetic.main.fragment_send_exhibit.*
+import okhttp3.ResponseBody
+import org.w3c.dom.Text
+import pelikan.bp.pelikanj.ApiClient
 import pelikan.bp.pelikanj.R
+import pelikan.bp.pelikanj.viewModels.ExhibitItemWithExhibitImage
+import pelikan.bp.pelikanj.viewModels.ExhibitItemWithoutExhibitImage
+import pelikan.bp.pelikanj.viewModels.InstitutionsModelItem
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.ByteArrayOutputStream
 
 
 class SendExhibitFragment : Fragment() {
 
-    lateinit var exhibitName: TextInputLayout
-    lateinit var exhibitInfoLabel: TextInputLayout
-    lateinit var image: TextInputLayout
-    lateinit var buildingNumber: TextInputLayout
-    lateinit var roomNumber: TextInputLayout
-    lateinit var showCaseNumber: TextInputLayout
-    lateinit var sendExhibitButton: Button
+    private lateinit var exhibitName: TextInputLayout
+    private lateinit var exhibitInfoLabel: TextInputLayout
+    private lateinit var imageInfoLabel: ImageView
+    private lateinit var infoLabelButton: Button
+    private lateinit var imageExhibit: ImageView
+    private lateinit var exhibitButton: Button
+    private lateinit var institution: TextInputLayout
+    private lateinit var buildingNumber: TextInputLayout
+    private lateinit var roomNumber: TextInputLayout
+    private lateinit var showCaseNumber: TextInputLayout
+    private lateinit var sendExhibitButton: Button
+    private lateinit var autoCompleteTextView: AutoCompleteTextView
+
+    private lateinit var scrollView: ScrollView
+
+    private var infoLabelImageUri: Uri? = null
+    private var exhibitImageUri: Uri? = null
+    private var encodedImageInfo: String = ""
+    private var encodedImageExhibit: String = ""
+
+    lateinit var animation: LottieAnimationView
+    lateinit var animationF: LottieAnimationView
+    lateinit var frameLayout: FrameLayout
+
+    lateinit var fromsmall: Animation
+    lateinit var fromnothing: Animation
+    lateinit var foricon: Animation
+    lateinit var overbox: LinearLayout
+    lateinit var card: LinearLayout
+    lateinit var cardF: LinearLayout
+
+    var institutions: ArrayList<InstitutionsModelItem> = ArrayList()
+    var institutionsName: ArrayList<String> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, SavedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, SavedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_send_exhibit, container, false)
+
+        frameLayout = view.findViewById(R.id.send_exhibit_fragment)
+
+        frameLayout.addView(inflater.inflate(R.layout.animation_success,null))
+        frameLayout.addView(inflater.inflate(R.layout.animation_failed,null))
 
         initForm(view)
 
-        sendExhibitButton.setOnClickListener { checkRequiredValues() }
+        setUpAnimation()
+
+        fillAutocomplete(view)
+
+        infoLabelButton.setOnClickListener {
+            openImageChooser(42)
+        }
+
+        exhibitButton.setOnClickListener {
+            openImageChooser(7)
+        }
+
+        sendExhibitButton.setOnClickListener {
+            if(checkRequiredValues()){
+                sendExhibit()
+            }
+        }
 
 
         return view
     }
 
+    private fun openImageChooser(flag: Int) {
+        val chooseImageIntent = ImagePicker.getPickImageIntent(requireView().context)
+        startActivityForResult(chooseImageIntent, flag)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                42 -> {
+                    infoLabelImageUri = ImagePicker.getImageFromResult(requireView().context,resultCode,data)
+                    imageInfoLabel.setImageURI(infoLabelImageUri)
+                    val bm: Bitmap? = ImagePicker.getBitmapFromResult(requireView().context,resultCode,data)
+                    val baos = ByteArrayOutputStream()
+                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                    encodedImageInfo = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
+                }
+                7 -> {
+                    exhibitImageUri = ImagePicker.getImageFromResult(requireView().context,resultCode,data)
+                    imageExhibit.setImageURI(exhibitImageUri)
+                    val bm: Bitmap? = ImagePicker.getBitmapFromResult(requireView().context,resultCode,data)
+                    val baos = ByteArrayOutputStream()
+                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                    encodedImageExhibit = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
+                }
+            }
+        }
+    }
+
     private fun initForm(view: View){
         exhibitName = view.findViewById(R.id.exhibit_name)
         exhibitInfoLabel = view.findViewById(R.id.exhibit_info_label)
+        imageInfoLabel = view.findViewById(R.id.imageView_info_label_image)
+        infoLabelButton = view.findViewById(R.id.choose_info_label_image)
+        imageExhibit = view.findViewById(R.id.imageView_exhibit_image)
+        exhibitButton = view.findViewById(R.id.choose_exhibit_image)
+        institution = view.findViewById(R.id.institution_name)
         buildingNumber = view.findViewById(R.id.building_number)
         roomNumber = view.findViewById(R.id.room_number)
         showCaseNumber = view.findViewById(R.id.showCase_number)
         sendExhibitButton = view.findViewById(R.id.send_exhibit_button)
+        autoCompleteTextView = view.findViewById(R.id.autoComplete_institutions)
+
+        scrollView = view.findViewById(R.id.send_exhibit_scrollView)
+
+        animation = view.findViewById(R.id.animationSuccess)
+        card = view.findViewById(R.id.popup)
+
+        animationF = view.findViewById(R.id.animationFailed)
+        cardF = view.findViewById(R.id.popup_failed)
+
+        overbox = view.findViewById(R.id.overbox)
+
+        val textAnimation = view.findViewById<TextView>(R.id.animation_success_text)
+        textAnimation.text = resources.getString(R.string.send_exhibit_success)
+
+        val animationTextF: TextView = view.findViewById(R.id.animation_failed_text)
+        animationTextF.text = resources.getString(R.string.registration_failed)
     }
 
-    public fun sendExhibit(view: View) {
+    private fun fillAutocomplete(view: View){
+
+        val client: Call<List<InstitutionsModelItem>> = ApiClient.create().getInstitutions()
+
+        client.enqueue(object : Callback<List<InstitutionsModelItem>> {
+            override fun onResponse(
+                call: Call<List<InstitutionsModelItem>?>,
+                response: Response<List<InstitutionsModelItem>?>
+            ) {
+                val respBody = response.body()!!
+                for (respo: InstitutionsModelItem in respBody) {
+                    institutions.add(respo)
+                    institutionsName.add(respo.name)
+                }
+            }
+
+            override fun onFailure(call: Call<List<InstitutionsModelItem>>, t: Throwable) {
+                Log.println(Log.ERROR,tag,t.toString())
+            }
+        })
+
+        val adapter: ArrayAdapter<String> = ArrayAdapter(view.context,android.R.layout.simple_spinner_dropdown_item,institutionsName)
+
+        autoCompleteTextView.setAdapter(adapter)
+    }
+
+    private fun sendExhibit() {
+
+        val exhibitNameS = exhibitName.editText?.text.toString()
+        val infoLabel: String = exhibitInfoLabel.editText?.text.toString().ifEmpty {
+            ""
+        }
+
+        val instiName = institution.editText?.text.toString()
+        val instiId = getInstitutionIdByName(instiName)
+        val buildingName = buildingNumber.editText?.text.toString()
+        val roomName = roomNumber.editText?.text.toString()
+        val showCaseName = showCaseNumber.editText?.text.toString()
+        lateinit var exhibitItemWithExhibitImage: ExhibitItemWithExhibitImage
+        lateinit var exhibitItemWithoutExhibitImage: ExhibitItemWithoutExhibitImage
+        lateinit var client: Call<ResponseBody>
+
+        if (encodedImageExhibit == ""){
+            // Bez obrázku
+            exhibitItemWithoutExhibitImage = ExhibitItemWithoutExhibitImage(exhibitNameS,infoLabel,encodedImageInfo,
+                                                            buildingName,roomName,showCaseName)
+            client = ApiClient.create().uploadNewExhibit(instiId,exhibitItemWithoutExhibitImage)
+        } else {
+            // S obrázkem
+            exhibitItemWithExhibitImage = ExhibitItemWithExhibitImage(exhibitNameS,encodedImageExhibit,infoLabel,encodedImageInfo,
+                                                            buildingName, roomName, showCaseName)
+            client = ApiClient.create().uploadNewExhibitWithExhibitImage(instiId,exhibitItemWithExhibitImage)
+        }
+
+        client.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody?>,
+                response: Response<ResponseBody>
+            ) {
+                //Check if correct
+                if (response.code() == 201){
+                    // Correct
+                    doAnimation()
+                    animation.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {
+                        }
+
+                        override fun onAnimationEnd(animations: Animator) {
+                            resetForm()
+                            // reset animation possition
+                            card.y -= scrollView.scrollY
+                            animation.y -= scrollView.scrollY
+                            setUpAnimation()
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator) {
+                        }
+                    })
+                } else {
+                    // Chyba
+                    doAnimationFailed()
+                    animationF.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {
+                        }
+
+                        override fun onAnimationEnd(animations: Animator) {
+                            // reset animation possition
+                            cardF.y -= scrollView.scrollY
+                            animationF.y -= scrollView.scrollY
+                            setUpAnimation()
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator) {
+                        }
+                    })
+                }
+
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.d(Log.ERROR.toString(), t.toString())
+            }
 
 
+        })
+
+    }
+
+    private fun resetForm() {
+        exhibitName.editText?.text = Editable.Factory.getInstance().newEditable("")
+        exhibitInfoLabel.editText?.text = Editable.Factory.getInstance().newEditable("")
+        imageInfoLabel.setImageURI(null)
+        encodedImageInfo = ""
+        imageExhibit.setImageURI(null)
+        encodedImageExhibit = ""
+    }
+
+    private fun doAnimation() {
+        animation.visibility = View.VISIBLE
+        animation.y += scrollView.scrollY.toFloat()
+        animation.startAnimation(foricon)
+        animation.playAnimation()
+        animation.repeatCount = 1
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        card.alpha = 1F
+        card.y += scrollView.scrollY.toFloat()
+        card.startAnimation(fromsmall)
+    }
+
+    private fun doAnimationFailed() {
+        animationF.visibility = View.VISIBLE
+        animationF.y += scrollView.scrollY.toFloat()
+        animationF.startAnimation(foricon)
+        animationF.playAnimation()
+        animationF.repeatCount = 1
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        cardF.alpha = 1F
+        cardF.y += scrollView.scrollY.toFloat()
+        cardF.startAnimation(fromsmall)
+    }
+
+    private fun setUpAnimation() {
+        fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
+        fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
+        foricon = AnimationUtils.loadAnimation(context,R.anim.foricon)
+
+        card.alpha = 0F
+        cardF.alpha = 0F
+        overbox.alpha = 0F
+        animation.visibility = View.GONE
+        animationF.visibility = View.GONE
+
+    }
+
+    private fun getInstitutionIdByName(nameOfInstitution: String): Int {
+        for (institution: InstitutionsModelItem in institutions){
+            if (institution.name == nameOfInstitution){
+                return institution.institutionId
+            }
+        }
+        return -1
     }
 
     private fun checkRequiredValues(): Boolean {
         if (!validateExhibitName() or !validateExhibitInfoLabel()
-            or !validateBuildingNumber() or !validateRoomNumber()
-            or !validateShowCaseNumber()
+            or !validateInstitution() or !validateBuildingNumber()
+            or !validateRoomNumber() or !validateShowCaseNumber()
+            or !validateImageInfoLabel()
         ) {
             return false
         }
@@ -92,6 +377,36 @@ class SendExhibitFragment : Fragment() {
             exhibitInfoLabel.error = null
             exhibitInfoLabel.isErrorEnabled = false
             return true
+        }
+    }
+
+    private fun validateImageInfoLabel(): Boolean {
+
+        if (infoLabelImageUri == null) {
+            infoLabelButton.error = resources.getString(R.string.requiredInfoLabelImage)
+            return false
+        } else {
+            infoLabelButton.error = null
+            return true
+        }
+    }
+
+    private fun validateInstitution(): Boolean {
+        val exhibitInstitutionString: String = institution.editText?.text.toString()
+
+        if (exhibitInstitutionString.isEmpty()) {
+            institution.error = resources.getString(R.string.requiredNameOfInstitutionFromList)
+            return false
+        } else {
+            for (suggestion: String in institutionsName) {
+                if (institution.editText?.text.toString() == suggestion){
+                    institution.error = null
+                    institution.isErrorEnabled = false
+                    return true
+                }
+            }
+            institution.error = resources.getString(R.string.requiredNameOfInstitutionFromList)
+            return false
         }
     }
 
@@ -143,10 +458,8 @@ class SendExhibitFragment : Fragment() {
         }
     }
 
-
     companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SendExhibitFragment().apply { }
+        const val REQUEST_CODE_PICK_IMAGE = 42
     }
+
 }

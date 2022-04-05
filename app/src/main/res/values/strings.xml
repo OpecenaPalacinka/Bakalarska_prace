@@ -20,7 +20,7 @@
     <string name="send_exhibit">Pošli exponát</string>
     <string name="become_translator">Stát se překladatelem</string>
     <string name="name_of_exhibit">Jméno exponátu</string>
-    <string name="exhibit_info_label">Text o exponátu</string>
+    <string name="exhibit_info_label">Text o exponátu (nepovinné)</string>
     <string name="image_with_exhibit_info_label">Obrázek s textem k exponátu</string>
     <string name="building_name_or_number">Jméno/číslo budovy</string>
     <string name="room_number">Jméno/číslo místnosti</string>
@@ -46,4 +46,20 @@
     <string name="profile_icon">Ikona změny profilového obrázku</string>
     <string name="favourite_institutions_icon">Ikona oblíbených institucí</string>
     <string name="language_settings_icon">Ikona nastavení jazyka</string>
+    <string name="choose_your_language">Zadejte váš jazyk</string>
+    <string name="institution_name">Název instituce</string>
+    <string name="requiredNameOfInstitutionFromList">Vyberte název instituce ze seznamu</string>
+    <string name="choose_image">Vyberte foto</string>
+    <string name="image_with_exhibit_non_required">Obrázek s exponátem (nepovinné)</string>
+    <string name="requiredInfoLabelImage">Vyberte obrázek s textem</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_pick_exhibit_fragment">Výběr</string>
+    <string name="choose_institution">Vyberte instituci</string>
+    <string name="pick_exhibit_text">Výběr exponátu</string>
+    <string name="search_translation">Vyhledat překlad</string>
+    <string name="address">Adresa</string>
+    <string name="registration_successfull">Registrace se zdařila</string>
+    <string name="send_exhibit_success">Uložení exponátu se zdařilo</string>
+    <string name="registration_failed">Registrace se nezdařila</string>
 </resources>

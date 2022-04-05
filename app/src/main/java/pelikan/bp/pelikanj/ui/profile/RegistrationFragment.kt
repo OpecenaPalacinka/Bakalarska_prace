@@ -1,15 +1,31 @@
 package pelikan.bp.pelikanj.ui.profile
 
+import android.animation.Animator
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.text.Editable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
+import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.textfield.TextInputLayout
+import okhttp3.ResponseBody
+import pelikan.bp.pelikanj.ApiClient
 import pelikan.bp.pelikanj.R
+import pelikan.bp.pelikanj.viewModels.User
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class RegistrationFragment : Fragment() {
@@ -19,6 +35,18 @@ class RegistrationFragment : Fragment() {
     lateinit var passwordInput: TextInputLayout
     lateinit var passwordAgainInput: TextInputLayout
     lateinit var registrationButton: Button
+    lateinit var animation: LottieAnimationView
+    lateinit var animationF: LottieAnimationView
+    lateinit var frameLayout: FrameLayout
+
+
+    lateinit var fromsmall: Animation
+    lateinit var fromnothing: Animation
+    lateinit var foricon: Animation
+    lateinit var overbox: LinearLayout
+    lateinit var card: LinearLayout
+    lateinit var cardF: LinearLayout
+    private var navController: NavController ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,14 +54,130 @@ class RegistrationFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        var view: View = inflater.inflate(R.layout.fragment_registration, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view: View = inflater.inflate(R.layout.fragment_registration, container, false)
+
+        frameLayout = view.findViewById(R.id.registration_fragment)
+
+        frameLayout.addView(inflater.inflate(R.layout.animation_success,null))
+        frameLayout.addView(inflater.inflate(R.layout.animation_failed,null))
 
         initForm(view)
 
-        registrationButton.setOnClickListener { checkFormValues() }
+        setUpAnimation()
+
+        registrationButton.setOnClickListener {
+            if(checkFormValues()){
+                sendRegistration()
+            }
+        }
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        navController = Navigation.findNavController(view)
+
+    }
+
+    private fun sendRegistration() {
+        val user: User = User(usernameInput.editText?.text.toString(),
+                             passwordInput.editText?.text.toString(),
+                             emailInput.editText?.text.toString())
+
+        val client: Call<ResponseBody> = ApiClient.create().registerUser(user)
+
+        client.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody?>,
+                response: Response<ResponseBody?>
+            ) {
+                if (response.code() == 201){
+                    doAnimation()
+                    animation.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {
+                        }
+
+                        override fun onAnimationEnd(animation: Animator) {
+                            navController?.navigate(R.id.action_navigation_registration_to_navigation_profile)
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator) {
+                        }
+                    })
+                } else {
+                        // Wrong code
+                    doAnimationFailed()
+                    animationF.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {
+                        }
+
+                        override fun onAnimationEnd(animation: Animator) {
+                            emailInput.editText?.text = Editable.Factory.getInstance().newEditable("")
+                            usernameInput.editText?.text = Editable.Factory.getInstance().newEditable("")
+                            passwordInput.editText?.text = Editable.Factory.getInstance().newEditable("")
+                            passwordAgainInput.editText?.text = Editable.Factory.getInstance().newEditable("")
+                            setUpAnimation()
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator) {
+                        }
+                    })
+                    }
+
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.println(Log.ERROR,tag,t.toString())
+            }
+        })
+
+    }
+
+    private fun doAnimation() {
+        animation.visibility = View.VISIBLE
+        animation.startAnimation(foricon)
+        animation.playAnimation()
+        animation.repeatCount = 1
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        card.alpha = 1F
+        card.startAnimation(fromsmall)
+    }
+
+    private fun doAnimationFailed() {
+        animationF.visibility = View.VISIBLE
+        animationF.startAnimation(foricon)
+        animationF.playAnimation()
+        animationF.repeatCount = 1
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        cardF.alpha = 1F
+        cardF.startAnimation(fromsmall)
+    }
+
+    private fun setUpAnimation() {
+        fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
+        fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
+        foricon = AnimationUtils.loadAnimation(context,R.anim.foricon)
+
+        card.alpha = 0F
+        cardF.alpha = 0F
+        overbox.alpha = 0F
+        animation.visibility = View.GONE
+        animationF.visibility = View.GONE
+
     }
 
 
@@ -44,6 +188,20 @@ class RegistrationFragment : Fragment() {
         passwordAgainInput = view.findViewById(R.id.password_again)
 
         registrationButton = view.findViewById(R.id.register_button)
+
+        animation = view.findViewById(R.id.animationSuccess)
+        card = view.findViewById(R.id.popup)
+
+        animationF = view.findViewById(R.id.animationFailed)
+        cardF = view.findViewById(R.id.popup_failed)
+
+        overbox = view.findViewById(R.id.overbox)
+
+        val animationText: TextView = view.findViewById(R.id.animation_success_text)
+        animationText.text = resources.getString(R.string.registration_successfull)
+
+        val animationTextF: TextView = view.findViewById(R.id.animation_failed_text)
+        animationTextF.text = resources.getString(R.string.registration_failed)
     }
 
     private fun checkFormValues():Boolean {

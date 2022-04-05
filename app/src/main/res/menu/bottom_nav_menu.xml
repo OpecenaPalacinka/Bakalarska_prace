@@ -7,6 +7,11 @@
         android:title="@string/title_scanner_fragment" />
 
     <item
+        android:id="@+id/navigation_pickExhibit"
+        android:icon="@drawable/ic_magnifying_glass"
+        android:title="@string/title_pick_exhibit_fragment" />
+
+    <item
         android:id="@+id/navigation_institutions"
         android:icon="@drawable/ic_baseline_location_city_24"
         android:title="@string/title_institutions_fragment" />
