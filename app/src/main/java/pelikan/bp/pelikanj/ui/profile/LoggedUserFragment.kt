@@ -2,30 +2,43 @@ package pelikan.bp.pelikanj.ui.profile
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import kotlinx.android.synthetic.main.fragment_logged_user.*
-import kotlinx.android.synthetic.main.fragment_more.*
+import com.google.gson.Gson
+import com.mikhaellopez.circularimageview.CircularImageView
+import pelikan.bp.pelikanj.DBClient
 import pelikan.bp.pelikanj.R
 import pelikan.bp.pelikanj.ui.more.ImagePicker
+import pelikan.bp.pelikanj.viewModels.User
+import java.io.ByteArrayOutputStream
+
 
 class LoggedUserFragment : Fragment() {
 
-    var navControler: NavController ?= null
+    private var navControler: NavController ?= null
 
-    lateinit var changePassword: LinearLayout
-    lateinit var changeProfilePicture: LinearLayout
-    lateinit var favouriteInstitutions: LinearLayout
-    lateinit var changeLanguage: LinearLayout
-    lateinit var logout: LinearLayout
+    private lateinit var username: TextView
+    private lateinit var email: TextView
+    private lateinit var profilePicture: CircularImageView
+
+    private lateinit var changePassword: LinearLayout
+    private lateinit var changeProfilePicture: LinearLayout
+    private lateinit var favouriteInstitutions: LinearLayout
+    private lateinit var changeLanguage: LinearLayout
+    private lateinit var logout: LinearLayout
+
+    private lateinit var dbClient: DBClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,11 +46,16 @@ class LoggedUserFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_logged_user, container, false)
+
+        dbClient = DBClient(requireContext())
 
         initLayout(view)
 
+        setUpListeners()
+
+        setUserInfo()
 
         return view
     }
@@ -45,9 +63,6 @@ class LoggedUserFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navControler = Navigation.findNavController(view)
-
-        setUpListeners()
-
 
     }
 
@@ -74,12 +89,41 @@ class LoggedUserFragment : Fragment() {
         }
     }
 
+    private fun setUserInfo(){
+        val userData = dbClient.getAllUserData()
+        val token = userData?.token
+        val profilePic = userData?.profilePicture
+
+        if (token!= null){
+            val onlyToken = token.substring(7, token.length)
+            val tokens = onlyToken.split(".")[1]
+            val jwt = Base64.decode(tokens, Base64.DEFAULT)
+            val info = String(jwt, Charsets.UTF_8)
+            val authors = Gson().fromJson(info, User::class.java)
+
+            username.text = authors.username
+            email.text = authors.email
+        }
+
+        if (profilePic != null){
+            val decodedString: ByteArray = Base64.decode(profilePic, Base64.DEFAULT)
+            val decodedByte =
+                BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+            profilePicture.setImageBitmap(decodedByte)
+        }
+
+    }
+
     private fun initLayout(view: View) {
         changePassword = view.findViewById(R.id.change_password)
         changeProfilePicture = view.findViewById(R.id.change_profil_picture)
         favouriteInstitutions = view.findViewById(R.id.favourite_institutions)
         changeLanguage = view.findViewById(R.id.language_settings)
         logout = view.findViewById(R.id.logout)
+
+        username = view.findViewById(R.id.username)
+        email = view.findViewById(R.id.email)
+        profilePicture = view.findViewById(R.id.imageview_profile)
     }
 
     private fun openImageChooser() {
@@ -92,7 +136,15 @@ class LoggedUserFragment : Fragment() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 42 -> {
-                    Toast.makeText(requireView().context,ImagePicker.getImageFromResult(requireView().context,resultCode,data).toString()+"",Toast.LENGTH_LONG).show()
+                    val bm: Bitmap? = ImagePicker.getBitmapFromResult(requireView().context,resultCode,data)
+                    val baos = ByteArrayOutputStream()
+                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                    val image = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
+                    dbClient.updateProfilePicture(image)
+                    val decodedString: ByteArray = Base64.decode(image, Base64.DEFAULT)
+                    val decodedByte =
+                        BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                    profilePicture.setImageBitmap(decodedByte)
                 }
             }
         }

@@ -7,5 +7,6 @@ data class InstitutionsModelItem(
     val institutionId: Int,
     val latitude: Double,
     val longitude: Double,
-    val name: String
+    val name: String,
+    val description: String
 )

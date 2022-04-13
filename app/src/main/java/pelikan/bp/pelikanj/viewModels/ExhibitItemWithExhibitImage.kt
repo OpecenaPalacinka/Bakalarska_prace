@@ -5,9 +5,9 @@ data class ExhibitItemWithExhibitImage(
     val encodedImage: String,
     val infoLabelText: String,
     val encodedInfoLabel: String,
-    val building: String,
-    val room: String,
-    val showcase: String
+    val buildingId: String,
+    val roomId: String,
+    val showcaseId: String
 )
 
 

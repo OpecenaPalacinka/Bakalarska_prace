@@ -43,8 +43,6 @@ class MoreFragment : Fragment() {
                 "Pokud již účet máte, na stránkách xyz.cz se přihlašte, v navigaci najdete možnost Překládat."
 
 
-
-
         return view
     }
 

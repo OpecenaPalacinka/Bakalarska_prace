@@ -12,20 +12,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import okhttp3.ResponseBody
-import okhttp3.internal.wait
 import pelikan.bp.pelikanj.ApiClient
+import pelikan.bp.pelikanj.DBClient
 import pelikan.bp.pelikanj.R
 import pelikan.bp.pelikanj.viewModels.InstitutionsModelItem
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.awaitResponse
 
 
 class InstitutionsFragment : Fragment() {
@@ -33,7 +33,9 @@ class InstitutionsFragment : Fragment() {
     private val institutionsName: ArrayList<String> = ArrayList()
     private val institutionsAddress: ArrayList<String> = ArrayList()
     private val institutionsImagesStrings: ArrayList<String> = ArrayList()
+    private val institutionsDescriptions: ArrayList<String> = ArrayList()
     private val institutionsImages: ArrayList<Bitmap> = ArrayList()
+    private var institutionsList: ArrayList<InstitutionsModelItem> = ArrayList()
     private lateinit var institutionImageFromServer: Image
 
     val aList: MutableList<HashMap<String, SpannableStringBuilder>> = ArrayList()
@@ -47,6 +49,8 @@ class InstitutionsFragment : Fragment() {
     lateinit var institutionNameCard: TextView
     lateinit var institutionAddressCard: TextView
     lateinit var institutionDescriptionCard: TextView
+
+    var height: Int = 0
 
     lateinit var constraintLayout: ConstraintLayout
 
@@ -62,13 +66,38 @@ class InstitutionsFragment : Fragment() {
 
         initInstitutions(view)
 
-        if (institutionsName.size == 0){
-            fillInstitutions()
-        }
+        val dbClient = DBClient(requireContext())
+        institutionsList = dbClient.getAllInstitutions()
+
+        fillInstitutions()
+
+        height = WindowManager.LayoutParams().height
 
         setUpAnimation()
 
+        setUpListeners()
+
         return view
+    }
+
+    private fun setUpListeners(){
+        listView.setOnItemClickListener { _, _, position, _ ->
+
+            doAnimation()
+
+            imageIcon.setImageBitmap(institutionsImages[position])
+            institutionNameCard.text = institutionsName[position]
+            institutionAddressCard.text = institutionsAddress[position]
+            institutionDescriptionCard.text = institutionsDescriptions[position]
+
+        }
+
+        overbox.setOnClickListener {
+            if (fromsmall.hasEnded()) {
+                setUpAnimation()
+            }
+        }
+
     }
 
     private fun getInstitutionImages() {
@@ -91,6 +120,23 @@ class InstitutionsFragment : Fragment() {
         }
     }
 
+    private fun doAnimation() {
+        imageIcon.visibility = View.VISIBLE
+        imageIcon.startAnimation(foricon)
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = height
+        overbox.layoutParams = params
+
+        card.alpha = 1F
+        card.startAnimation(fromsmall)
+
+
+    }
+
     private fun setUpAnimation() {
         fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
         fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
@@ -100,22 +146,9 @@ class InstitutionsFragment : Fragment() {
         overbox.alpha = 0F
         imageIcon.visibility = View.GONE
 
-        listView.setOnItemClickListener { _, _, position, _ ->
-
-            imageIcon.visibility = View.VISIBLE
-            imageIcon.startAnimation(foricon)
-
-            overbox.alpha = 1F
-            overbox.startAnimation(fromnothing)
-
-            card.alpha = 1F
-            card.startAnimation(fromsmall)
-
-            imageIcon.setImageBitmap(institutionsImages[position])
-            institutionNameCard.text = institutionsName[position]
-            institutionAddressCard.text = institutionsAddress[position]
-
-        }
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = 0
+        overbox.layoutParams = params
     }
 
     private fun initInstitutions(view: View) {
@@ -130,27 +163,14 @@ class InstitutionsFragment : Fragment() {
 
     private fun fillInstitutions() {
 
-        val client: Call<List<InstitutionsModelItem>> = ApiClient.create().getInstitutions()
-
-        client.enqueue(object : Callback<List<InstitutionsModelItem>> {
-            override fun onResponse(
-                call: Call<List<InstitutionsModelItem>?>,
-                response: Response<List<InstitutionsModelItem>?>
-            ) {
-                val respBody = response.body()!!
-                for (respo: InstitutionsModelItem in respBody) {
-                    institutionsName.add(respo.name)
-                    institutionsAddress.add(respo.address)
-                    institutionsImagesStrings.add(respo.image)
-                }
-                setupInstitutions()
-                getInstitutionImages()
-            }
-
-            override fun onFailure(call: Call<List<InstitutionsModelItem>>, t: Throwable?) {
-                Log.println(Log.ERROR,tag,"Error when getting institutions!")
-            }
-        })
+        for (respo: InstitutionsModelItem in institutionsList) {
+            institutionsName.add(respo.name)
+            institutionsAddress.add(respo.address)
+            institutionsImagesStrings.add(respo.image)
+            institutionsDescriptions.add(respo.description)
+        }
+        setupInstitutions()
+        getInstitutionImages()
 
     }
 

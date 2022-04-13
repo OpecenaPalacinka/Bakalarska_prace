@@ -52,7 +52,6 @@
     <string name="choose_image">Vyberte foto</string>
     <string name="image_with_exhibit_non_required">Obrázek s exponátem (nepovinné)</string>
     <string name="requiredInfoLabelImage">Vyberte obrázek s textem</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_pick_exhibit_fragment">Výběr</string>
     <string name="choose_institution">Vyberte instituci</string>
@@ -62,4 +61,12 @@
     <string name="registration_successfull">Registrace se zdařila</string>
     <string name="send_exhibit_success">Uložení exponátu se zdařilo</string>
     <string name="registration_failed">Registrace se nezdařila</string>
+    <string name="change_successfull">Změna byla úspěšná</string>
+    <string name="change_password_successfull">Změna hesla byla úspěšná</string>
+    <string name="change_password_failed">Změna hesla se nezdařila</string>
+    <string name="password_old">Aktuální heslo</string>
+    <string name="requiredNameOfBuildingFromList">Vyberte název budovy ze seznamu</string>
+    <string name="requiredNameOfRoomFromList">Vyberte název místnosti ze seznamu</string>
+    <string name="requiredNameOfShowcaseFromList">Vyberte název vitríny ze seznamu</string>
+    <string name="requiredNameOfExhibitFromList">Vyberte název exponátu ze seznamu</string>
 </resources>

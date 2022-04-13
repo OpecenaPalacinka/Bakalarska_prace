@@ -60,13 +60,21 @@
         android:id="@+id/language_settings"
         android:name="pelikan.bp.pelikanj.ui.more.languageSetting.LanguageSettingFragment"
         android:label="@string/language_settings"
-        tools:layout="@layout/fragment_language_setting" />
+        tools:layout="@layout/fragment_language_setting" >
+        <action
+            android:id="@+id/action_language_settings_to_navigation_more"
+            app:destination="@id/navigation_more" />
+    </fragment>
 
     <fragment
         android:id="@+id/change_password"
         android:name="pelikan.bp.pelikanj.ui.profile.ChangePasswordFragment"
         android:label="@string/change_password"
-        tools:layout="@layout/fragment_language_setting" />
+        tools:layout="@layout/fragment_language_setting" >
+        <action
+            android:id="@+id/action_change_password_to_navigation_profile"
+            app:destination="@id/navigation_profile" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_logged_user"

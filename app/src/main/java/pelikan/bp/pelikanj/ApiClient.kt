@@ -1,14 +1,12 @@
 package pelikan.bp.pelikanj
 
+import com.google.gson.JsonObject
 import okhttp3.ResponseBody
 import pelikan.bp.pelikanj.viewModels.*
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ApiClient {
 
@@ -19,7 +17,7 @@ interface ApiClient {
     fun getImage(@Path("imageName") imageName: String): Call<ResponseBody>
 
     @GET("/exhibits/all/{institutionId}")
-    fun getAllExhibitsOfInstitution(@Path("institutionId") id: Int): Call<String>
+    fun getAllExhibitsOfInstitution(@Path("institutionId") id: Int): Call<ExhibitModel>
 
     @POST("/exhibits/{institutionId}")
     fun uploadNewExhibitWithExhibitImage(@Path("institutionId") id: Int,
@@ -35,6 +33,21 @@ interface ApiClient {
     @POST("/users/login")
     fun loginUser(@Body user: UserLogin): Call<TokenModel>
 
+    @PUT("/users/updatePassword")
+    fun updatePassword(@Header("Authorization") token: String, @Body password: PasswordModel): Call<ResponseBody>
+
+    @GET("/translations/official/{exhibitId}/{languageCode}")
+    fun getTranslation(@Path("exhibitId") exhibitId: Int,
+                       @Path("languageCode") languageCode: String): Call<Translation>
+
+    @GET("/location/buildings/all/{institutionId}")
+    fun getBuildings(@Path("institutionId") institutionId: Int): Call<List<Building>>
+
+    @GET("/location/rooms/all/{buildingId}")
+    fun getRooms(@Path("buildingId") buildingId: Int): Call<List<Room>>
+
+    @GET("/location/showcases/all/{roomId}")
+    fun getShowcases(@Path("roomId") roomId: Int): Call<List<Showcase>>
 
     companion object {
 

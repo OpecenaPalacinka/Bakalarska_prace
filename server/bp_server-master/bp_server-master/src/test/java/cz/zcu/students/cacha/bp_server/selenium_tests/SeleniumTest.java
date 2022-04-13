@@ -83,14 +83,11 @@ public class SeleniumTest {
         // add language to institution
         institutionService.addLanguage(languageRepository.findByCode("cs").get().getId(), user);
         // add exhibit
-        MockExhibit mockExhibit = new MockExhibit("name", "text", "1", "1", "1");
+        MockExhibit mockExhibit = new MockExhibit("name", "text");
         Exhibit exhibit = new Exhibit();
         exhibit.setName(mockExhibit.getName());
         exhibit.setInfoLabelText(mockExhibit.getInfoLabelText());
         exhibit.setEncodedInfoLabel(mockExhibit.getEncodedInfoLabel());
-        exhibit.setBuilding(mockExhibit.getBuilding());
-        exhibit.setRoom(mockExhibit.getRoom());
-        exhibit.setShowcase(mockExhibit.getShowcase());
         exhibitService.saveExhibit(exhibit, user);
     }
 
@@ -114,7 +111,7 @@ public class SeleniumTest {
         seleniumManager.clickAnchorWithText("Translate");
         seleniumManager.waitUntilInstitutionPage();
         seleniumManager.clickBtnWithText("Exhibits");
-        seleniumManager.selectFirstInSelect();
+        seleniumManager.selectLanguageInSelect();
         seleniumManager.clickBtnWithText("Translate");
         seleniumManager.waitUntilTranslationPage();
         seleniumManager.changeEditorText("test translation text");

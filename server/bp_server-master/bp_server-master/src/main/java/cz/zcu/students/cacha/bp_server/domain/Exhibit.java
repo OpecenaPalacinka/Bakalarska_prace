@@ -1,11 +1,13 @@
 package cz.zcu.students.cacha.bp_server.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.zcu.students.cacha.bp_server.validators.PngJpgFile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.Objects;
@@ -26,6 +28,7 @@ public class Exhibit {
      */
     @Id
     @GeneratedValue
+    @JsonIgnore
     private Long id;
 
     /**
@@ -40,6 +43,7 @@ public class Exhibit {
      * name of image of exhibit in fs
      */
     @Column(length = 100)
+    @JsonIgnore
     private String image = DEFAULT_EXHIBIT_IMAGE;
 
     /**
@@ -61,6 +65,7 @@ public class Exhibit {
      * name of image of info label in fs
      */
     @Column(length = 100)
+    @JsonIgnore
     private String infoLabel;
 
     /**
@@ -72,45 +77,66 @@ public class Exhibit {
     private String encodedInfoLabel;
 
     /**
-     * building where is exhibit located
+     * id of building where is exhibit located
      */
-    @NotNull(message = "Building can not be blank")
-    @Size(max = 50, message = "Building must be maximally 50 letters long")
-    @Column(length = 50)
-    private String building;
+    @Transient
+    @Pattern(regexp="^\\d+$", message="Building id must be a positive integer")
+    private String buildingId;
 
     /**
-     * room where is exhibit located
+     * id of room where is exhibit located
      */
-    @NotNull(message = "Room can not be blank")
-    @Size(max = 50, message = "Room must be maximally 50 letters long")
-    @Column(length = 50)
-    private String room;
+    @Transient
+    @Pattern(regexp="^\\d+$", message="Room id must be a positive integer")
+    private String roomId;
 
     /**
-     * show-case where is exhibit located
+     * id of show-case where is exhibit located
      */
-    @NotNull(message = "Show-case can not be blank")
-    @Size(max = 50, message = "Show-case must be maximally 50 letters long")
-    @Column(length = 50)
-    private String showcase;
+    @Transient
+    @Pattern(regexp="^\\d+$", message="Show-case id must be a positive integer")
+    private String showcaseId;
 
     /**
      * all translations matching to exhibit
      */
     @OneToMany(mappedBy = "exhibit", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @JsonIgnore
     private Set<Translation> translations;
 
     /**
      * institution owning exhibit
      */
     @ManyToOne(fetch=FetchType.LAZY)
+    @JsonIgnore
     private Institution institution;
+
+    /**
+     * building where is exhibit located
+     */
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JsonIgnore
+    private Building building;
+
+    /**
+     * room where is exhibit located
+     */
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JsonIgnore
+    private Room room;
+
+    /**
+     * show-case where is exhibit located
+     */
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JsonIgnore
+    private Showcase showcase;
 
     /**
      * register date of exhibit
      */
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date createdAt;
 
     /**

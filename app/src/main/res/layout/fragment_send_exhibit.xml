@@ -95,7 +95,6 @@
             app:boxBackgroundColor="#d6d6d6"
             app:startIconDrawable="@drawable/ic_baseline_location_city_24">
 
-
             <AutoCompleteTextView
                 android:id="@+id/autoComplete_institutions"
                 android:layout_width="match_parent"
@@ -107,30 +106,30 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/building_number"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="40dp"
             android:background="@android:color/transparent"
-            android:hint="@string/building_name_or_number"
+            android:queryHint="@string/building_name_or_number"
             app:boxBackgroundColor="#d6d6d6"
             app:startIconDrawable="@drawable/ic_baseline_location_city_24">
 
 
-            <com.google.android.material.textfield.TextInputEditText
+            <AutoCompleteTextView
+                android:id="@+id/autoComplete_buildings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:lines="1"
-                android:maxLines="1"
-                android:singleLine="true" />
+                android:completionThreshold="1"
+                android:hint="@string/building_name_or_number"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/room_number"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
@@ -142,18 +141,17 @@
             app:startIconDrawable="@drawable/ic_baseline_room_24">
 
 
-            <com.google.android.material.textfield.TextInputEditText
+            <AutoCompleteTextView
+                android:id="@+id/autoComplete_rooms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:lines="1"
-                android:maxLines="1"
-                android:singleLine="true" />
+                android:completionThreshold="1" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/showCase_number"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
@@ -163,9 +161,11 @@
             app:boxBackgroundColor="#d6d6d6"
             app:startIconDrawable="@drawable/ic_magnifying_glass">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <AutoCompleteTextView
+                android:id="@+id/autoComplete_showCases"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 

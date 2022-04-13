@@ -1,25 +1,26 @@
 package pelikan.bp.pelikanj.ui.profile
 
 import android.animation.Animator
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.view.inputmethod.InputMethodManager
-import android.widget.*
-import androidx.core.content.ContextCompat.getSystemService
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.textfield.TextInputLayout
 import pelikan.bp.pelikanj.ApiClient
+import pelikan.bp.pelikanj.DBClient
 import pelikan.bp.pelikanj.R
 import pelikan.bp.pelikanj.viewModels.TokenModel
 import pelikan.bp.pelikanj.viewModels.UserLogin
@@ -45,6 +46,8 @@ class ProfileFragment : Fragment() {
     lateinit var overbox: LinearLayout
     lateinit var cardF: LinearLayout
 
+    lateinit var dbClient: DBClient
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_profile, container, false)
@@ -52,6 +55,8 @@ class ProfileFragment : Fragment() {
         frameLayout = view.findViewById(R.id.profile_fragment)
 
         frameLayout.addView(inflater.inflate(R.layout.animation_failed,null))
+
+        dbClient = DBClient(requireContext())
 
         return view
     }
@@ -107,6 +112,10 @@ class ProfileFragment : Fragment() {
             ) {
                 if (response.code() == 200){
                     // OK
+                    val fullToken = response.body()?.token!!
+
+                    dbClient.updateToken(fullToken)
+
                     navControler?.navigate(R.id.action_navigation_profile_to_navigation_logged_user)
                 } else {
                     // Wrong credentials
