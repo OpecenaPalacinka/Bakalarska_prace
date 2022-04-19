@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pick_exhibit_fragment_scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="?attr/actionBarSize"
@@ -9,160 +10,179 @@
     android:orientation="vertical"
     tools:context=".ui.findExhibit.PickExhibitFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="55dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/pick_exhibit_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="65dp"
-            android:layout_marginStart="20dp"
-            android:text="@string/pick_exhibit_text"
-            android:textAlignment="center"
-            android:textColor="#4A4A4A"
-            android:textSize="27sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/search_institutions"
+        <FrameLayout
+            android:id="@+id/pick_exhibit_fragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="30dp"
-            android:background="@android:color/transparent"
-            app:boxBackgroundColor="#d6d6d6"
-            app:startIconDrawable="@drawable/ic_baseline_location_city_24"
-            app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
-            app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
-            app:queryHint="@string/choose_institution"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+            android:layout_height="wrap_content">
 
-            <AutoCompleteTextView
-                android:id="@+id/autoComplete_institutions"
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:completionThreshold="1"
-                android:hint="@string/institution_name"/>
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="55dp"
+                android:layout_marginEnd="4dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <TextView
+                    android:id="@+id/pick_exhibit_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="65dp"
+                    android:text="@string/pick_exhibit_text"
+                    android:textAlignment="center"
+                    android:textColor="#4A4A4A"
+                    android:textSize="27sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/search_buildings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="30dp"
-            android:background="@android:color/transparent"
-            app:boxBackgroundColor="#d6d6d6"
-            app:startIconDrawable="@drawable/ic_baseline_location_city_24"
-            app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
-            app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
-            app:queryHint="@string/building_name_or_number"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_institutions"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="30dp"
+                    android:background="@android:color/transparent"
+                    app:boxBackgroundColor="#d6d6d6"
+                    app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
+                    app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
+                    app:queryHint="@string/choose_institution"
+                    app:startIconDrawable="@drawable/ic_baseline_location_city_24">
 
-            <AutoCompleteTextView
-                android:id="@+id/autoComplete_buildings"
+                    <AutoCompleteTextView
+                        android:id="@+id/autoComplete_institutions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:completionThreshold="1"
+                        android:hint="@string/institution_name" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_buildings"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="30dp"
+                    android:background="@android:color/transparent"
+                    app:boxBackgroundColor="#d6d6d6"
+                    app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
+                    app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
+                    app:queryHint="@string/building_name_or_number"
+                    app:startIconDrawable="@drawable/ic_baseline_location_city_24">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/autoComplete_buildings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:completionThreshold="1"
+                        android:hint="@string/building_name_or_number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_rooms"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="30dp"
+                    android:background="@android:color/transparent"
+                    app:boxBackgroundColor="#d6d6d6"
+                    app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
+                    app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
+                    app:queryHint="@string/room_number"
+                    app:startIconDrawable="@drawable/ic_baseline_room_24">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/autoComplete_rooms"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:completionThreshold="1"
+                        android:hint="@string/room_number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_showCases"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="30dp"
+                    android:background="@android:color/transparent"
+                    app:boxBackgroundColor="#d6d6d6"
+                    app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
+                    app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
+                    app:queryHint="@string/showcase_name_or_number"
+                    app:startIconDrawable="@drawable/ic_magnifying_glass">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/autoComplete_showCases"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:completionThreshold="1"
+                        android:hint="@string/showcase_name_or_number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_exhibits"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="30dp"
+                    android:background="@android:color/transparent"
+                    app:boxBackgroundColor="#d6d6d6"
+                    app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
+                    app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
+                    app:queryHint="@string/name_of_exhibit"
+                    app:startIconDrawable="@drawable/ic_magnifying_glass">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/autoComplete_exhibits"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:completionThreshold="1"
+                        android:hint="@string/name_of_exhibit" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/search_translation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginTop="36dp"
+                    android:layout_marginBottom="100dp"
+                    android:text="@string/search_translation" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/overbox"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:completionThreshold="1"
-                android:hint="@string/building_name_or_number"/>
+                android:layout_height="match_parent"
+                android:background="@drawable/overbox"
+                android:elevation="0dp"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent">
 
-        </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/search_rooms"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="30dp"
-            android:background="@android:color/transparent"
-            app:boxBackgroundColor="#d6d6d6"
-            app:startIconDrawable="@drawable/ic_baseline_room_24"
-            app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
-            app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
-            app:queryHint="@string/room_number"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-            <AutoCompleteTextView
-                android:id="@+id/autoComplete_rooms"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:completionThreshold="1"
-                android:hint="@string/room_number"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/search_showCases"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="30dp"
-            android:background="@android:color/transparent"
-            app:boxBackgroundColor="#d6d6d6"
-            app:startIconDrawable="@drawable/ic_magnifying_glass"
-            app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
-            app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
-            app:queryHint="@string/showcase_name_or_number"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-            <AutoCompleteTextView
-                android:id="@+id/autoComplete_showCases"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:completionThreshold="1"
-                android:hint="@string/showcase_name_or_number"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/search_exhibits"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="30dp"
-            android:background="@android:color/transparent"
-            app:boxBackgroundColor="#d6d6d6"
-            app:startIconDrawable="@drawable/ic_magnifying_glass"
-            app:layout_constraintStart_toStartOf="@id/pick_exhibit_text"
-            app:layout_constraintTop_toBottomOf="@id/pick_exhibit_text"
-            app:queryHint="@string/name_of_exhibit"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-            <AutoCompleteTextView
-                android:id="@+id/autoComplete_exhibits"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:completionThreshold="1"
-                android:hint="@string/name_of_exhibit"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/search_translation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
-            android:layout_marginStart="40dp"
-            android:layout_marginBottom="?attr/actionBarSize"
-            android:text="@string/search_translation" />
-
-    </LinearLayout>
+        </FrameLayout>
 
 </ScrollView>

@@ -1,6 +1,7 @@
 package pelikan.bp.pelikanj
 
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -8,8 +9,11 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.gson.Gson
 import pelikan.bp.pelikanj.databinding.ActivityMainBinding
 import pelikan.bp.pelikanj.viewModels.InstitutionsModelItem
+import pelikan.bp.pelikanj.viewModels.TokenData
+import pelikan.bp.pelikanj.viewModels.TokenModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,7 +33,9 @@ class MainActivity : AppCompatActivity() {
 
         dbClient = DBClient(applicationContext)
 
-        if (dbClient.getAllUserData() == null){
+        val userData = dbClient.getAllUserData()
+
+        if (userData == null){
             dbClient.insertDefaultData("cs",null,null)
         }
 
@@ -39,6 +45,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val navView: BottomNavigationView = binding.navView
+
+        if (userData?.token != null){
+
+            // Get token without "BEARER "
+            val onlyToken = userData.token!!.substring(7, userData.token!!.length)
+            // Get only body part - first part is header, second body and third is signing
+            val tokens = onlyToken.split(".")[1]
+            // Get byte array of decoded
+            val jwt = Base64.decode(tokens, Base64.DEFAULT)
+            // Get byte array to string
+            val info = String(jwt, Charsets.UTF_8)
+            // Parse it to TokenData class
+            val authors = Gson().fromJson(info, TokenData::class.java)
+
+            // Not expired
+            if (authors.exp >= (System.currentTimeMillis() / 1000).toInt()){
+                // refresh token
+                updateToken(onlyToken)
+            }
+
+        }
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
@@ -50,6 +77,29 @@ class MainActivity : AppCompatActivity() {
         ))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    private fun updateToken(token: String) {
+
+        val client: Call<TokenModel> = ApiClient.create().updateToken(token)
+
+        client.enqueue(object : Callback<TokenModel> {
+            override fun onResponse(
+                call: Call<TokenModel>,
+                response: Response<TokenModel>
+            ) {
+                if (response.code() == 200){
+                    // OK
+                    val newToken = response.body()!!.token
+                    dbClient.updateToken(newToken)
+                }
+            }
+
+            override fun onFailure(call: Call<TokenModel>, t: Throwable) {
+                Log.println(Log.ERROR,"error",t.toString())
+            }
+        })
+
     }
 
     private fun getInstitutions(): ArrayList<InstitutionsModelItem> {

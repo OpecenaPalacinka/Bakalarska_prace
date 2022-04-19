@@ -1,17 +1,22 @@
 package pelikan.bp.pelikanj.ui.findExhibit
 
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.Button
-import android.widget.Toast
+import android.view.WindowManager
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.*
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.Gson
+import kotlinx.android.synthetic.main.animation_failed.*
+import okhttp3.ResponseBody
 import pelikan.bp.pelikanj.ApiClient
 import pelikan.bp.pelikanj.DBClient
 import pelikan.bp.pelikanj.R
@@ -19,7 +24,6 @@ import pelikan.bp.pelikanj.viewModels.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
 
 class PickExhibitFragment : Fragment() {
 
@@ -35,6 +39,7 @@ class PickExhibitFragment : Fragment() {
     private lateinit var autoCompleteExhibits: AutoCompleteTextView
 
     private lateinit var searchTranslationButton: Button
+    private lateinit var scrollView: ScrollView
 
     private var exhibits: ArrayList<ExhibitModelItem> = ArrayList()
     private var institutions: ArrayList<InstitutionsModelItem> = ArrayList()
@@ -43,17 +48,30 @@ class PickExhibitFragment : Fragment() {
     private var showcases: ArrayList<Showcase> = ArrayList()
     private lateinit var institutionsName: ArrayList<String>
 
+    private lateinit var fromsmall: Animation
+    private lateinit var fromnothing: Animation
+    private lateinit var foricon: Animation
+    lateinit var overbox: LinearLayout
+    lateinit var card: LinearLayout
+    lateinit var cardF: LinearLayout
+    lateinit var textView: TextView
+
+    lateinit var animationF: LottieAnimationView
+
+    lateinit var frameLayout: FrameLayout
+
+    var height: Int = 0
+
     private lateinit var dbClient: DBClient
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-
-
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_pick_exhibit, container, false)
+
+        frameLayout = view.findViewById(R.id.pick_exhibit_fragment)
+
+        frameLayout.addView(inflater.inflate(R.layout.translation_card,null))
+        frameLayout.addView(inflater.inflate(R.layout.animation_failed,null))
 
         dbClient = DBClient(requireContext())
 
@@ -61,15 +79,19 @@ class PickExhibitFragment : Fragment() {
 
         fillAutocompleteInstitutions(view)
 
+        height = WindowManager.LayoutParams().height
+
         setUpListeners(view)
+
+        setUpAnimation()
 
         return view
     }
 
     private fun setUpListeners(view: View){
-        var idOfBuilding: Int = 0
+        var idOfBuilding = 0
         var idOfRoom = 0
-        var idOfShowcase: Int = 0
+        var idOfShowcase = 0
 
         autoCompleteInstitutions.setOnItemClickListener { parent, _, position, _ ->
             autoCompleteBuildings.editableText.clear()
@@ -152,6 +174,12 @@ class PickExhibitFragment : Fragment() {
                 getTranslation(idOfExhibit)
             }
         }
+
+        overbox.setOnClickListener {
+            if (fromsmall.hasEnded()) {
+                setUpAnimation()
+            }
+        }
     }
 
     private fun checkValues():Boolean {
@@ -166,26 +194,71 @@ class PickExhibitFragment : Fragment() {
     private fun getTranslation(idOfExhibit: Int) {
         val lCode = dbClient.getAllUserData()?.language!!
 
-        val client: Call<Translation> = ApiClient.create().getTranslation(idOfExhibit,lCode)
+        val client: Call<ResponseBody> = ApiClient.create().getTranslation(idOfExhibit,lCode)
 
-        client.enqueue(object : Callback<Translation> {
+        client.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(
-                call: Call<Translation>,
-                response: Response<Translation>
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
             ) {
                 if (response.code() == 200){
                     // Show translation
-                    Toast.makeText(requireContext(),response.body()?.translatedText,Toast.LENGTH_LONG).show()
-                } else {
+                    val resp: String = response.body()!!.string()
+                    val body = Gson().fromJson(resp, Translation::class.java)
+                    val text = body.translatedText
+                    textView.text = HtmlCompat.fromHtml(text,HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    doAnimation()
+                    resetForm()
+                } else if (response.code() == 400){
                     // Try english
+                    getEnglishTranslation(idOfExhibit)
                 }
 
             }
 
-            override fun onFailure(call: Call<Translation>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.println(Log.ERROR,tag,t.toString())
             }
         })
+    }
+
+    private fun getEnglishTranslation(idOfExhibit: Int) {
+        val lCode = "en"
+
+        val client: Call<ResponseBody> = ApiClient.create().getTranslation(idOfExhibit,lCode)
+
+        client.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                if (response.code() == 200){
+                    // Show translation
+                    val resp: String = response.body()!!.string()
+                    val body = Gson().fromJson(resp, Translation::class.java)
+                    val text = body.translatedText
+                    textView.text = HtmlCompat.fromHtml(text,HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    doAnimation()
+                    resetForm()
+                } else if (response.code() == 400){
+                    // Try english
+                    animation_failed_text.text = resources.getString(R.string.no_translation)
+                    doAnimationFailed()
+                    resetForm()
+                    cardF.y -= scrollView.scrollY
+                    animationF.y -= scrollView.scrollY
+                }
+
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.println(Log.ERROR,tag,t.toString())
+            }
+        })
+    }
+
+    private fun resetForm() {
+        searchExhibits.editText?.text = Editable.Factory.getInstance().newEditable("")
     }
 
     private fun getExhibitIdByName(exhibitName: String, showcaseId: Int, roomId: Int, buildingId: Int): Int {
@@ -402,7 +475,7 @@ class PickExhibitFragment : Fragment() {
         val exhibitBuildingString: String = searchBuildings.editText?.text.toString()
 
         if (exhibitBuildingString.isEmpty()) {
-            searchInstitutions.error =
+            searchBuildings.error =
                 resources.getString(R.string.requiredNameOfBuildingFromList)
             return false
         } else {
@@ -482,6 +555,53 @@ class PickExhibitFragment : Fragment() {
         }
     }
 
+    private fun doAnimation() {
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = height
+        overbox.layoutParams = params
+
+        card.alpha = 1F
+        card.y += scrollView.scrollY.toFloat()
+        card.startAnimation(fromsmall)
+    }
+
+    private fun doAnimationFailed() {
+        animationF.visibility = View.VISIBLE
+        animationF.y += scrollView.scrollY.toFloat()
+        animationF.startAnimation(foricon)
+        animationF.playAnimation()
+        animationF.repeatCount = 1
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = height
+        overbox.layoutParams = params
+
+        cardF.alpha = 1F
+        cardF.y += scrollView.scrollY.toFloat()
+        cardF.startAnimation(fromsmall)
+    }
+
+    private fun setUpAnimation() {
+        fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
+        fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
+        foricon = AnimationUtils.loadAnimation(context,R.anim.foricon)
+
+        card.alpha = 0F
+        cardF.alpha = 0F
+        overbox.alpha = 0F
+
+        animationF.visibility = View.GONE
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = 0
+        overbox.layoutParams = params
+    }
 
     private fun initForm(view: View) {
         searchInstitutions = view.findViewById(R.id.search_institutions)
@@ -496,6 +616,14 @@ class PickExhibitFragment : Fragment() {
         autoCompleteExhibits = view.findViewById(R.id.autoComplete_exhibits)
         searchTranslationButton = view.findViewById(R.id.search_translation)
 
+        scrollView = view.findViewById(R.id.pick_exhibit_fragment_scrollView)
+
+        card = view.findViewById(R.id.popup)
+        overbox = view.findViewById(R.id.overbox)
+        textView = view.findViewById(R.id.translated_text)
+
+        animationF = view.findViewById(R.id.animationFailed)
+        cardF = view.findViewById(R.id.popup_failed)
     }
 
 }

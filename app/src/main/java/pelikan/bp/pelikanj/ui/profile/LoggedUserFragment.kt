@@ -85,6 +85,7 @@ class LoggedUserFragment : Fragment() {
         }
 
         logout.setOnClickListener{
+            dbClient.updateToken(null)
             navControler?.navigate(R.id.action_navigation_logged_user_to_navigation_profile)
         }
     }

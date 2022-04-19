@@ -3,7 +3,6 @@ package pelikan.bp.pelikanj.ui.institutions
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.Image
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -36,25 +35,24 @@ class InstitutionsFragment : Fragment() {
     private val institutionsDescriptions: ArrayList<String> = ArrayList()
     private val institutionsImages: ArrayList<Bitmap> = ArrayList()
     private var institutionsList: ArrayList<InstitutionsModelItem> = ArrayList()
-    private lateinit var institutionImageFromServer: Image
 
-    val aList: MutableList<HashMap<String, SpannableStringBuilder>> = ArrayList()
+    private val aList: MutableList<HashMap<String, SpannableStringBuilder>> = ArrayList()
 
     lateinit var overbox: LinearLayout
     lateinit var card: LinearLayout
-    lateinit var imageIcon: ImageView
-    lateinit var fromsmall: Animation
-    lateinit var fromnothing: Animation
-    lateinit var foricon: Animation
-    lateinit var institutionNameCard: TextView
-    lateinit var institutionAddressCard: TextView
-    lateinit var institutionDescriptionCard: TextView
+    private lateinit var imageIcon: ImageView
+    private lateinit var fromsmall: Animation
+    private lateinit var fromnothing: Animation
+    private lateinit var foricon: Animation
+    private lateinit var institutionNameCard: TextView
+    private lateinit var institutionAddressCard: TextView
+    private lateinit var institutionDescriptionCard: TextView
 
     var height: Int = 0
 
-    lateinit var constraintLayout: ConstraintLayout
+    private lateinit var constraintLayout: ConstraintLayout
 
-    lateinit var listView: ListView
+    private lateinit var listView: ListView
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

@@ -40,6 +40,7 @@
 
         <TextView
             android:id="@+id/animation_failed_text"
+            android:gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="30dp"
             android:textStyle="bold"

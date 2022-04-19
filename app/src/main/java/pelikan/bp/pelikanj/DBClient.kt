@@ -72,7 +72,7 @@ class DBClient(context: Context?) :
         res.close()
     }
 
-    fun updateToken(token: String){
+    fun updateToken(token: String?){
         val db = this.writableDatabase
         val values = ContentValues()
         val res = db.rawQuery("select * from UserData",null)

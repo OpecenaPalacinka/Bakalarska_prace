@@ -1,11 +1,11 @@
 package pelikan.bp.pelikanj.viewModels
 
 data class Translation(
-    val authorUsername: String,
-    val createdAt: String,
+    val translationId: Int,
     val institutionId: Int,
-    val isOfficial: Boolean,
-    val likesCount: Int,
+    val authorUsername: String,
     val translatedText: String,
-    val translationId: Int
+    val isOfficial: Boolean,
+    val createdAt: String,
+    val likesCount: Int
 )

@@ -69,4 +69,6 @@
     <string name="requiredNameOfRoomFromList">Vyberte název místnosti ze seznamu</string>
     <string name="requiredNameOfShowcaseFromList">Vyberte název vitríny ze seznamu</string>
     <string name="requiredNameOfExhibitFromList">Vyberte název exponátu ze seznamu</string>
+    <string name="translated_text">Přeložený text</string>
+    <string name="no_translation">Neexistuje překlad ve vašem jazyce ani v angličtině</string>
 </resources>

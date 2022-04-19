@@ -1,6 +1,5 @@
 package pelikan.bp.pelikanj
 
-import com.google.gson.JsonObject
 import okhttp3.ResponseBody
 import pelikan.bp.pelikanj.viewModels.*
 import retrofit2.Call
@@ -36,9 +35,12 @@ interface ApiClient {
     @PUT("/users/updatePassword")
     fun updatePassword(@Header("Authorization") token: String, @Body password: PasswordModel): Call<ResponseBody>
 
+    @GET("/users/token")
+    fun updateToken(@Header("Authorization") token: String): Call<TokenModel>
+
     @GET("/translations/official/{exhibitId}/{languageCode}")
     fun getTranslation(@Path("exhibitId") exhibitId: Int,
-                       @Path("languageCode") languageCode: String): Call<Translation>
+                       @Path("languageCode") languageCode: String): Call<ResponseBody>
 
     @GET("/location/buildings/all/{institutionId}")
     fun getBuildings(@Path("institutionId") institutionId: Int): Call<List<Building>>
@@ -59,7 +61,7 @@ interface ApiClient {
 
             val retrofit = Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(LOCALHOST_URL)
+                .baseUrl(PHONE_URL_TEST)
                 .build()
             return retrofit.create(ApiClient::class.java)
 

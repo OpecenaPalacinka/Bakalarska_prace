@@ -19,9 +19,11 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.Gson
 import pelikan.bp.pelikanj.ApiClient
 import pelikan.bp.pelikanj.DBClient
 import pelikan.bp.pelikanj.R
+import pelikan.bp.pelikanj.viewModels.TokenData
 import pelikan.bp.pelikanj.viewModels.TokenModel
 import pelikan.bp.pelikanj.viewModels.UserLogin
 import retrofit2.Call
@@ -64,6 +66,23 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navControler = Navigation.findNavController(view)
+
+        val userData = dbClient.getAllUserData()
+
+        if (userData?.token != null){
+
+            val onlyToken = userData.token!!.substring(7, userData.token!!.length)
+            val tokens = onlyToken.split(".")[1]
+            val jwt = Base64.decode(tokens, Base64.DEFAULT)
+            val info = String(jwt, Charsets.UTF_8)
+            val authors = Gson().fromJson(info, TokenData::class.java)
+
+            // Not expired
+            if (authors.exp >= (System.currentTimeMillis() / 1000).toInt()){
+                navControler?.navigate(R.id.action_navigation_profile_to_navigation_logged_user)
+            }
+
+        }
 
         initForm(view)
 

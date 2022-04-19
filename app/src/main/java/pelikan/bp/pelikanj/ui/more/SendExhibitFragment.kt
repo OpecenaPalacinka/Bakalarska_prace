@@ -93,7 +93,7 @@ class SendExhibitFragment : Fragment() {
 
         setUpAnimation()
 
-        setUpListeners(view)
+        setUpListeners()
 
         fillAutocomplete(view)
 
@@ -115,9 +115,9 @@ class SendExhibitFragment : Fragment() {
         return view
     }
 
-    private fun setUpListeners(view: View){
-        var idOfBuilding = 0
-        var idOfRoom = 0
+    private fun setUpListeners() {
+        var idOfBuilding: Int
+        var idOfRoom: Int
 
         autoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
             autoCompleteBuildings.editableText.clear()
@@ -658,7 +658,6 @@ class SendExhibitFragment : Fragment() {
     }
 
     companion object {
-        const val REQUEST_CODE_PICK_IMAGE = 42
     }
 
 }
