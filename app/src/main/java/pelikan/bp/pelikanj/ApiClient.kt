@@ -53,7 +53,7 @@ interface ApiClient {
 
     companion object {
 
-        private const val BASE_URL = "https://bp-web.herokuapp.com/"
+        private const val BASE_URL = "http://147.228.67.66/"
         private const val PHONE_URL_TEST = "http://192.168.0.15:8080/" // my PC IP address
         private const val LOCALHOST_URL = "http://10.0.2.2:8080/"
 
@@ -61,7 +61,7 @@ interface ApiClient {
 
             val retrofit = Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(PHONE_URL_TEST)
+                .baseUrl(BASE_URL)
                 .build()
             return retrofit.create(ApiClient::class.java)
 

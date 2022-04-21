@@ -6,5 +6,5 @@ data class ExhibitItemWithoutExhibitImage(
     val encodedInfoLabel: String,
     val buildingId: String,
     val roomId: String,
-    val showcaseId: String
+    val showcaseId: String?
 )

@@ -128,7 +128,7 @@ class LoggedUserFragment : Fragment() {
     }
 
     private fun openImageChooser() {
-        val chooseImageIntent = ImagePicker.getPickImageIntent(requireView().context)
+        val chooseImageIntent = ImagePicker.getPickImageIntent()
         startActivityForResult(chooseImageIntent, 42)
     }
 

@@ -4,13 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
+import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.exifinterface.media.ExifInterface
 import pelikan.bp.pelikanj.R
 import java.io.File
 import java.io.FileNotFoundException
@@ -20,41 +21,21 @@ object ImagePicker {
 
     private const val TEMP_IMAGE_NAME = "tempImage"
 
-    private const val minWidthQuality = 400;
+    private const val minWidthQuality = 400
 
-    fun getPickImageIntent(context: Context): Intent {
-        lateinit var chooserIntent: Intent
-        val intentList: MutableList<Intent> = ArrayList()
-        val pickIntent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        )
-        val takePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        takePhotoIntent.putExtra("return-data", true)
-        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(context)))
-        addIntentsToList(context, intentList, pickIntent)
-        addIntentsToList(context, intentList, takePhotoIntent)
-        if (intentList.size > 0) {
-            chooserIntent = Intent.createChooser(
-                intentList.removeAt(intentList.size - 1),
-                context.getString(R.string.image_with_exhibit_info_label)
-            )
-            chooserIntent.putExtra(
-                Intent.EXTRA_INITIAL_INTENTS,
-                intentList.toTypedArray()
-            )
-        }
-        return chooserIntent
-    }
+    fun getPickImageIntent(): Intent {
+        val galleryintent = Intent(Intent.ACTION_GET_CONTENT, null)
+        galleryintent.type = "image/*"
 
-    private fun addIntentsToList(context: Context, list: MutableList<Intent>, intent: Intent) {
-        val resInfo = context.packageManager.queryIntentActivities(intent, 0)
-        for (resolveInfo in resInfo) {
-            val packageName = resolveInfo.activityInfo.packageName
-            val targetedIntent = Intent(intent)
-            targetedIntent.setPackage(packageName)
-            list.add(targetedIntent)
-        }
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        val chooser = Intent(Intent.ACTION_CHOOSER)
+        chooser.putExtra(Intent.EXTRA_INTENT, galleryintent)
+        chooser.putExtra(Intent.EXTRA_TITLE, R.string.choose_image)
+
+        val intentArray = arrayOf(cameraIntent)
+        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray)
+        return chooser
     }
 
     fun getImageFromResult(context: Context, resultCode: Int, imageReturnedIntent: Intent?): Uri? {
@@ -136,7 +117,7 @@ object ImagePicker {
         do {
             bm = decodeBitmap(context, selectedImage, sampleSizes[i])
             i++
-        } while (bm!!.width < minWidthQuality && i < sampleSizes.size)
+        } while (bm.width < minWidthQuality && i < sampleSizes.size)
         return bm
     }
 

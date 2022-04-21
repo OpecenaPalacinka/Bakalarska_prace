@@ -1,9 +1,13 @@
 package pelikan.bp.pelikanj
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -39,7 +43,11 @@ class MainActivity : AppCompatActivity() {
             dbClient.insertDefaultData("cs",null,null)
         }
 
+        checkPermission(Manifest.permission.CAMERA,42)
+
         getInstitutions()
+
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,43)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -123,5 +131,23 @@ class MainActivity : AppCompatActivity() {
         })
 
         return institutionsList
+    }
+
+    private fun checkPermission(permission: String, requestCode: Int) {
+        if (ContextCompat.checkSelfPermission(this@MainActivity, permission) == PackageManager.PERMISSION_DENIED) {
+            // Requesting the permission
+            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), requestCode)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>,
+                                            grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 42) {
+            checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,43)
+        } else {
+            checkPermission(Manifest.permission.CAMERA,42)
+        }
     }
 }

@@ -240,6 +240,7 @@ class DBClient(context: Context?) :
         val db = this.writableDatabase
         db.delete(SHOWCASESTABLENAME,null,null)
         val values = ContentValues()
+
         for (institution: Showcase in showcases){
             values.put("roomId",institution.roomId)
             values.put("createdAt",institution.createdAt)

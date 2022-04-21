@@ -1,6 +1,7 @@
 package pelikan.bp.pelikanj.ui.scanner
 
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
@@ -183,9 +185,10 @@ class ScannerFragment : Fragment() {
     }
 
     private fun initForm(view: View) {
-        card = view.findViewById(R.id.popup)
+        card = view.findViewById(R.id.popup_translation)
         overbox = view.findViewById(R.id.overbox)
         textView = view.findViewById(R.id.translated_text)
+        textView.movementMethod = ScrollingMovementMethod()
 
         animationF = view.findViewById(R.id.animationFailed)
         cardF = view.findViewById(R.id.popup_failed)

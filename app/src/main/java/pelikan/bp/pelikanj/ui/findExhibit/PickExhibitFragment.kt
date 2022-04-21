@@ -1,15 +1,21 @@
 package pelikan.bp.pelikanj.ui.findExhibit
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
+import android.text.method.ScrollingMovementMethod
+import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.*
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import com.airbnb.lottie.LottieAnimationView
@@ -24,6 +30,7 @@ import pelikan.bp.pelikanj.viewModels.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 class PickExhibitFragment : Fragment() {
 
@@ -56,11 +63,15 @@ class PickExhibitFragment : Fragment() {
     lateinit var cardF: LinearLayout
     lateinit var textView: TextView
 
+    lateinit var parent: ConstraintLayout
+
     lateinit var animationF: LottieAnimationView
 
     lateinit var frameLayout: FrameLayout
 
-    var height: Int = 0
+    var heightOverbox: Int = 0
+    var heightCard: Int = 0
+    var heightScroll: Int = 0
 
     private lateinit var dbClient: DBClient
 
@@ -79,13 +90,34 @@ class PickExhibitFragment : Fragment() {
 
         fillAutocompleteInstitutions(view)
 
-        height = WindowManager.LayoutParams().height
+        heightOverbox = countHeight()
+        heightCard = heightOverbox / 2
 
         setUpListeners(view)
 
         setUpAnimation()
 
         return view
+    }
+
+    private fun countHeight(): Int{
+        val tv = TypedValue()
+        var actionBarHeight = 0
+        if (requireActivity().theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics)
+        }
+
+        val resource = requireContext().resources.getIdentifier("status_bar_height", "dimen", "android")
+        var statusBarHeight = 0
+        if (resource > 0) {
+            statusBarHeight = requireContext().resources.getDimensionPixelSize(resource)
+        }
+
+        val wm = requireContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val metrics = DisplayMetrics()
+        wm.defaultDisplay.getMetrics(metrics)
+
+        return metrics.heightPixels - (2 * actionBarHeight) - statusBarHeight
     }
 
     private fun setUpListeners(view: View){
@@ -119,6 +151,11 @@ class PickExhibitFragment : Fragment() {
             autoCompleteExhibits.editableText.clear()
             val item = parent.getItemAtPosition(position)
             idOfBuilding = getBuildingIdByName(item.toString())
+
+            if (rooms.isEmpty()){
+                fillAutocompleteExhibits(view,-1)
+            }
+
             if (idOfBuilding != -1){
                 fillAutocompleteRooms(view,idOfBuilding)
             } else {
@@ -137,6 +174,11 @@ class PickExhibitFragment : Fragment() {
             autoCompleteExhibits.editableText.clear()
             val item = parent.getItemAtPosition(position)
             idOfRoom = getRoomIdByName(item.toString(),idOfBuilding)
+
+            if (showcases.isEmpty()){
+                fillAutocompleteExhibits(view,-1)
+            }
+
             if (idOfRoom != -1){
                 fillAutocompleteShowcases(view,idOfRoom)
             } else {
@@ -163,13 +205,13 @@ class PickExhibitFragment : Fragment() {
 
         autoCompleteShowCases.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                validateShowcases()
+                //validateShowcases()
             }
         }
 
         searchTranslationButton.setOnClickListener {
             if (checkValues()){
-                val idOfExhibit = getExhibitIdByName(autoCompleteExhibits.editableText.toString(),idOfShowcase,idOfRoom,idOfBuilding)
+                val idOfExhibit = getExhibitIdByName(autoCompleteExhibits.editableText.toString(),idOfBuilding)
                 // funkce pro vyhledání exponátu
                 getTranslation(idOfExhibit)
             }
@@ -177,16 +219,38 @@ class PickExhibitFragment : Fragment() {
 
         overbox.setOnClickListener {
             if (fromsmall.hasEnded()) {
+                val paramsScroll: ViewGroup.LayoutParams = parent.layoutParams
+                paramsScroll.height = heightScroll
+                parent.layoutParams = paramsScroll
                 setUpAnimation()
             }
         }
+
+        scrollView.setOnTouchListener { _, _ ->
+            textView.getParent().requestDisallowInterceptTouchEvent(false)
+            false
+        }
+
+        textView.setOnTouchListener { _, _ ->
+            textView.getParent().requestDisallowInterceptTouchEvent(true)
+            false
+        }
+
+
     }
 
     private fun checkValues():Boolean {
-        if (!validateInstitution() or !validateBuildings()
-            or !validateRooms() or !validateShowcases()
-            or !validateExhibits()) {
-            return false
+        if (showcases.isEmpty()){
+            if (!validateInstitution() or !validateBuildings()
+                or !validateRooms() or !validateExhibits()) {
+                return false
+            }
+        } else {
+            if (!validateInstitution() or !validateBuildings()
+                or !validateRooms() or !validateShowcases()
+                or !validateExhibits()) {
+                return false
+            }
         }
         return true
     }
@@ -207,6 +271,7 @@ class PickExhibitFragment : Fragment() {
                     val body = Gson().fromJson(resp, Translation::class.java)
                     val text = body.translatedText
                     textView.text = HtmlCompat.fromHtml(text,HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    heightScroll = scrollView.layoutParams.height
                     doAnimation()
                     resetForm()
                 } else if (response.code() == 400){
@@ -239,6 +304,7 @@ class PickExhibitFragment : Fragment() {
                     val text = body.translatedText
                     textView.text = HtmlCompat.fromHtml(text,HtmlCompat.FROM_HTML_MODE_LEGACY)
                     doAnimation()
+
                     resetForm()
                 } else if (response.code() == 400){
                     // Try english
@@ -261,10 +327,9 @@ class PickExhibitFragment : Fragment() {
         searchExhibits.editText?.text = Editable.Factory.getInstance().newEditable("")
     }
 
-    private fun getExhibitIdByName(exhibitName: String, showcaseId: Int, roomId: Int, buildingId: Int): Int {
+    private fun getExhibitIdByName(exhibitName: String, buildingId: Int): Int {
         for (exhibit: ExhibitModelItem in exhibits){
-            if (exhibit.name == exhibitName && showcaseId == exhibit.showcase.showcaseId
-                && roomId == exhibit.room.roomId && buildingId == exhibit.building.buildingId){
+            if (exhibit.name == exhibitName && buildingId == exhibit.building.buildingId){
                 return exhibit.exhibitId
             }
         }
@@ -325,9 +390,15 @@ class PickExhibitFragment : Fragment() {
                     addShowcase(respo.showcase)
                 }
 
-                dbClient.insertAllBuildings(buildings)
-                dbClient.insertAllRooms(rooms)
-                dbClient.insertAllShowcases(showcases)
+                if (!buildings.isNullOrEmpty()){
+                    dbClient.insertAllBuildings(buildings)
+                }
+                if (!rooms.isNullOrEmpty()){
+                    dbClient.insertAllRooms(rooms)
+                }
+                if (!showcases.isNullOrEmpty()){
+                    dbClient.insertAllShowcases(showcases)
+                }
 
                 fillAutocompleteBuildings(view)
             }
@@ -347,7 +418,7 @@ class PickExhibitFragment : Fragment() {
                 bool = true
             }
         }
-        if (!bool){
+        if (!bool && building != null){
             buildings.add(building)
         }
     }
@@ -360,7 +431,7 @@ class PickExhibitFragment : Fragment() {
                 bool = true
             }
         }
-        if (!bool){
+        if (!bool && room != null){
             rooms.add(room)
         }
     }
@@ -373,7 +444,7 @@ class PickExhibitFragment : Fragment() {
                 bool = true
             }
         }
-        if (!bool){
+        if (!bool && showcase != null){
             showcases.add(showcase)
         }
 
@@ -440,7 +511,9 @@ class PickExhibitFragment : Fragment() {
         val exhibitName = ArrayList<String>()
 
         for (exhibit: ExhibitModelItem in exhibits) {
-            if (idOfShowcase == exhibit.showcase.showcaseId)
+            if (idOfShowcase == -1){
+                exhibitName.add(exhibit.name)
+            } else if (idOfShowcase == exhibit.showcase.showcaseId)
                 exhibitName.add(exhibit.name)
         }
 
@@ -556,12 +629,21 @@ class PickExhibitFragment : Fragment() {
     }
 
     private fun doAnimation() {
-        overbox.alpha = 1F
-        overbox.startAnimation(fromnothing)
 
         val params: ViewGroup.LayoutParams = overbox.layoutParams
-        params.height = height
+        params.height = heightOverbox
         overbox.layoutParams = params
+
+        val paramsCard: ViewGroup.LayoutParams = card.layoutParams
+        paramsCard.height = heightCard
+        card.layoutParams = paramsCard
+        card.visibility = VISIBLE
+
+
+        scrollView.scrollY = 0
+
+        overbox.alpha = 1F
+        overbox.startAnimation(fromnothing)
 
         card.alpha = 1F
         card.y += scrollView.scrollY.toFloat()
@@ -579,7 +661,7 @@ class PickExhibitFragment : Fragment() {
         overbox.startAnimation(fromnothing)
 
         val params: ViewGroup.LayoutParams = overbox.layoutParams
-        params.height = height
+        params.height = heightOverbox
         overbox.layoutParams = params
 
         cardF.alpha = 1F
@@ -596,7 +678,12 @@ class PickExhibitFragment : Fragment() {
         cardF.alpha = 0F
         overbox.alpha = 0F
 
-        animationF.visibility = View.GONE
+        animationF.visibility = GONE
+
+        val paramsCard: ViewGroup.LayoutParams = card.layoutParams
+        paramsCard.height = 0
+        card.layoutParams = paramsCard
+        card.visibility = GONE
 
         val params: ViewGroup.LayoutParams = overbox.layoutParams
         params.height = 0
@@ -618,12 +705,16 @@ class PickExhibitFragment : Fragment() {
 
         scrollView = view.findViewById(R.id.pick_exhibit_fragment_scrollView)
 
-        card = view.findViewById(R.id.popup)
+        card = view.findViewById(R.id.popup_translation)
         overbox = view.findViewById(R.id.overbox)
         textView = view.findViewById(R.id.translated_text)
+        textView.movementMethod = ScrollingMovementMethod()
 
         animationF = view.findViewById(R.id.animationFailed)
         cardF = view.findViewById(R.id.popup_failed)
+
+        parent = view.findViewById(R.id.main_parent)
+
     }
 
 }

@@ -91,7 +91,7 @@ class SendExhibitFragment : Fragment() {
 
         initForm(view)
 
-        setUpAnimation()
+        setUpAnimation(view)
 
         setUpListeners()
 
@@ -244,7 +244,7 @@ class SendExhibitFragment : Fragment() {
     }
 
     private fun openImageChooser(flag: Int) {
-        val chooseImageIntent = ImagePicker.getPickImageIntent(requireView().context)
+        val chooseImageIntent = ImagePicker.getPickImageIntent()
         startActivityForResult(chooseImageIntent, flag)
     }
 
@@ -372,7 +372,10 @@ class SendExhibitFragment : Fragment() {
         val instiId = getInstitutionIdByName(instiName)
         val buildingName = getBuildingIdByName(buildingNumber.editText?.text.toString()).toString()
         val roomName = getRoomIdByName(roomNumber.editText?.text.toString()).toString()
-        val showCaseName = getShowcaseIdByName(showCaseNumber.editText?.text.toString()).toString()
+        var showCaseName: String? = getShowcaseIdByName(showCaseNumber.editText?.text.toString()).toString()
+        if (getShowcaseIdByName(showCaseNumber.editText?.text.toString()) == -1){
+            showCaseName = null
+        }
         lateinit var exhibitItemWithExhibitImage: ExhibitItemWithExhibitImage
         lateinit var exhibitItemWithoutExhibitImage: ExhibitItemWithoutExhibitImage
         lateinit var client: Call<ResponseBody>
@@ -407,7 +410,7 @@ class SendExhibitFragment : Fragment() {
                             // reset animation possition
                             card.y -= scrollView.scrollY
                             animation.y -= scrollView.scrollY
-                            setUpAnimation()
+                            setUpAnimation(requireView())
                         }
 
                         override fun onAnimationCancel(animation: Animator) {
@@ -418,6 +421,7 @@ class SendExhibitFragment : Fragment() {
                     })
                 } else {
                     // Chyba
+                        println(response.code())
                     doAnimationFailed()
                     animationF.addAnimatorListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {
@@ -427,7 +431,7 @@ class SendExhibitFragment : Fragment() {
                             // reset animation possition
                             cardF.y -= scrollView.scrollY
                             animationF.y -= scrollView.scrollY
-                            setUpAnimation()
+                            setUpAnimation(requireView())
                         }
 
                         override fun onAnimationCancel(animation: Animator) {
@@ -526,7 +530,7 @@ class SendExhibitFragment : Fragment() {
         cardF.startAnimation(fromsmall)
     }
 
-    private fun setUpAnimation() {
+    private fun setUpAnimation(view: View) {
         fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
         fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
         foricon = AnimationUtils.loadAnimation(context,R.anim.foricon)
@@ -537,15 +541,31 @@ class SendExhibitFragment : Fragment() {
         animation.visibility = View.GONE
         animationF.visibility = View.GONE
 
+        val animationText: TextView = view.findViewById(R.id.animation_success_text)
+        animationText.text = resources.getString(R.string.upload_successfull)
+
+        val animationTextF: TextView = view.findViewById(R.id.animation_failed_text)
+        animationTextF.text = resources.getString(R.string.upload_failed)
+
+
     }
 
     private fun checkRequiredValues(): Boolean {
-        if (!validateExhibitName() or !validateExhibitInfoLabel()
-            or !validateInstitution() or !validateBuildingNumber()
-            or !validateRoomNumber() or !validateShowCaseNumber()
-            or !validateImageInfoLabel()
-        ) {
-            return false
+        if (showcases.isEmpty()){
+            if (!validateExhibitName() or !validateExhibitInfoLabel()
+                or !validateInstitution() or !validateBuildingNumber()
+                or !validateRoomNumber() or !validateImageInfoLabel()
+            ) {
+                return false
+            }
+        } else {
+            if (!validateExhibitName() or !validateExhibitInfoLabel()
+                or !validateInstitution() or !validateBuildingNumber()
+                or !validateRoomNumber() or !validateShowCaseNumber()
+                or !validateImageInfoLabel()
+            ) {
+                return false
+            }
         }
         return true
     }

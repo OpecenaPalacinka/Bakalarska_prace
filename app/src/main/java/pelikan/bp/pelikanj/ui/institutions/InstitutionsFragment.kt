@@ -31,9 +31,9 @@ class InstitutionsFragment : Fragment() {
 
     private val institutionsName: ArrayList<String> = ArrayList()
     private val institutionsAddress: ArrayList<String> = ArrayList()
-    private val institutionsImagesStrings: ArrayList<String> = ArrayList()
+    private val institutionsImagesStrings: MutableMap<String,String> = mutableMapOf()
     private val institutionsDescriptions: ArrayList<String> = ArrayList()
-    private val institutionsImages: ArrayList<Bitmap> = ArrayList()
+    private val institutionsImages: MutableMap<String,Bitmap> = mutableMapOf()
     private var institutionsList: ArrayList<InstitutionsModelItem> = ArrayList()
 
     private val aList: MutableList<HashMap<String, SpannableStringBuilder>> = ArrayList()
@@ -83,7 +83,7 @@ class InstitutionsFragment : Fragment() {
 
             doAnimation()
 
-            imageIcon.setImageBitmap(institutionsImages[position])
+            imageIcon.setImageBitmap(institutionsImages[institutionsName[position]])
             institutionNameCard.text = institutionsName[position]
             institutionAddressCard.text = institutionsAddress[position]
             institutionDescriptionCard.text = institutionsDescriptions[position]
@@ -99,8 +99,8 @@ class InstitutionsFragment : Fragment() {
     }
 
     private fun getInstitutionImages() {
-        for (imageName: String in institutionsImagesStrings){
-            val client: Call<ResponseBody> = ApiClient.create().getImage(imageName)
+        for (imageName in institutionsImagesStrings){
+            val client: Call<ResponseBody> = ApiClient.create().getImage(imageName.value)
 
             client.enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(
@@ -108,10 +108,10 @@ class InstitutionsFragment : Fragment() {
                     response: Response<ResponseBody?>
                 ) {
                     val respBody = response.body()!!
-                    institutionsImages.add(BitmapFactory.decodeStream(respBody.byteStream()))
+                    institutionsImages[imageName.key] = BitmapFactory.decodeStream(respBody.byteStream())
                 }
 
-                override fun onFailure(call: Call<ResponseBody>, t: Throwable?) {
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                     Log.println(Log.ERROR,tag,"Error when getting institutions image!")
                 }
             })
@@ -164,7 +164,7 @@ class InstitutionsFragment : Fragment() {
         for (respo: InstitutionsModelItem in institutionsList) {
             institutionsName.add(respo.name)
             institutionsAddress.add(respo.address)
-            institutionsImagesStrings.add(respo.image)
+            institutionsImagesStrings[respo.name] = (respo.image)
             institutionsDescriptions.add(respo.description)
         }
         setupInstitutions()
