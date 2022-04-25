@@ -1,11 +1,12 @@
 package pelikan.bp.pelikanj.ui.more
 
 import android.animation.Animator
-import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.util.Base64
 import android.util.Log
@@ -15,6 +16,7 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.airbnb.lottie.LottieAnimationView
@@ -50,14 +52,14 @@ class SendExhibitFragment : Fragment() {
 
     private lateinit var scrollView: ScrollView
 
-    private var infoLabelImageUri: Uri? = null
-    private var exhibitImageUri: Uri? = null
     private var encodedImageInfo: String = ""
     private var encodedImageExhibit: String = ""
 
     lateinit var animation: LottieAnimationView
     lateinit var animationF: LottieAnimationView
     lateinit var frameLayout: FrameLayout
+
+    var code: Int = 1
 
     private lateinit var fromsmall: Animation
     private lateinit var fromnothing: Animation
@@ -98,11 +100,13 @@ class SendExhibitFragment : Fragment() {
         fillAutocomplete(view)
 
         infoLabelButton.setOnClickListener {
-            openImageChooser(42)
+            code = 1
+            chooseProfilePicture()
         }
 
         exhibitButton.setOnClickListener {
-            openImageChooser(7)
+            code = 2
+            chooseProfilePicture()
         }
 
         sendExhibitButton.setOnClickListener {
@@ -241,35 +245,6 @@ class SendExhibitFragment : Fragment() {
                 Log.println(Log.ERROR,tag,t.toString())
             }
         })
-    }
-
-    private fun openImageChooser(flag: Int) {
-        val chooseImageIntent = ImagePicker.getPickImageIntent()
-        startActivityForResult(chooseImageIntent, flag)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                42 -> {
-                    infoLabelImageUri = ImagePicker.getImageFromResult(requireView().context,resultCode,data)
-                    imageInfoLabel.setImageURI(infoLabelImageUri)
-                    val bm: Bitmap? = ImagePicker.getBitmapFromResult(requireView().context,resultCode,data)
-                    val baos = ByteArrayOutputStream()
-                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
-                    encodedImageInfo = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
-                }
-                7 -> {
-                    exhibitImageUri = ImagePicker.getImageFromResult(requireView().context,resultCode,data)
-                    imageExhibit.setImageURI(exhibitImageUri)
-                    val bm: Bitmap? = ImagePicker.getBitmapFromResult(requireView().context,resultCode,data)
-                    val baos = ByteArrayOutputStream()
-                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
-                    encodedImageExhibit = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
-                }
-            }
-        }
     }
 
     private fun initForm(view: View){
@@ -601,7 +576,7 @@ class SendExhibitFragment : Fragment() {
 
     private fun validateImageInfoLabel(): Boolean {
 
-        if (infoLabelImageUri == null) {
+        if (encodedImageInfo == "") {
             infoLabelButton.error = resources.getString(R.string.requiredInfoLabelImage)
             return false
         } else {
@@ -677,7 +652,82 @@ class SendExhibitFragment : Fragment() {
         }
     }
 
-    companion object {
+    private fun chooseProfilePicture() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val inflater = layoutInflater
+        val dialogView: View = inflater.inflate(R.layout.aler_dialog, null)
+        builder.setCancelable(false)
+        builder.setView(dialogView)
+        val imageViewADPPCamera: ImageView = dialogView.findViewById(R.id.imageViewADPPCamera)
+        val imageViewADPPGallery: ImageView = dialogView.findViewById(R.id.imageViewADPPGallery)
+        val alertDialogProfilePicture: AlertDialog = builder.create()
+        alertDialogProfilePicture.show()
+        imageViewADPPCamera.setOnClickListener {
+             takePictureFromCamera()
+             alertDialogProfilePicture.dismiss()
+
+        }
+        imageViewADPPGallery.setOnClickListener {
+            takePictureFromGallery()
+            alertDialogProfilePicture.dismiss()
+        }
     }
+
+    private fun takePictureFromGallery() {
+        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(pickPhoto, 1)
+    }
+
+    private fun takePictureFromCamera() {
+        val takePicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (takePicture.resolveActivity(requireActivity().packageManager) != null) {
+            startActivityForResult(takePicture, 2)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            1 -> if (resultCode == RESULT_OK) {
+                if (code == 1){
+                    val selectedImageUri = data?.data
+                    imageInfoLabel.setImageURI(selectedImageUri)
+                    val bm = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, selectedImageUri)
+                    val baos = ByteArrayOutputStream()
+                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                    encodedImageInfo = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP)
+
+                } else {
+                    val selectedImageUri = data?.data
+                    imageExhibit.setImageURI(selectedImageUri)
+                    val bm = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, selectedImageUri)
+                    val baos = ByteArrayOutputStream()
+                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                    encodedImageExhibit = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP)
+                }
+
+            }
+            2 -> if (resultCode == RESULT_OK) {
+                if (code == 1){
+                    val bundle = data?.extras
+                    val bitmapImage = bundle!!["data"] as Bitmap?
+                    imageInfoLabel.setImageBitmap(bitmapImage)
+                    val baos = ByteArrayOutputStream()
+                    bitmapImage?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                    encodedImageInfo = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP)
+
+                } else {
+                    val bundle = data?.extras
+                    val bitmapImage = bundle!!["data"] as Bitmap?
+                    imageExhibit.setImageBitmap(bitmapImage)
+                    val baos = ByteArrayOutputStream()
+                    bitmapImage?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                    encodedImageExhibit = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP)
+                }
+
+            }
+        }
+    }
+
 
 }

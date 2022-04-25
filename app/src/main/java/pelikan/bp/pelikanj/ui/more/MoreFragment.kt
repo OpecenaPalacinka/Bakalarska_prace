@@ -23,24 +23,22 @@ class MoreFragment : Fragment() {
 
     private var navControler: NavController?= null
 
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view:View = inflater.inflate(R.layout.fragment_more, container, false)
 
         val expand: ExpandableTextView = view.findViewById(R.id.expand_text_view_about_us)
         expand.text = "\n" +
-                "O nás !O nás !O nás !O nás !O nás !O nás !O nás !" +
-                "O nás !O nás !O nás !O nás !O nás !O nás !O nás !O nás !" +
-                "O nás !O nás !O nás !O nás !O nás !O nás !O nás !O nás !" +
-                "O nás !O nás !O nás !O nás !O nás !O nás !O nás !" +
-                "O nás !O nás !O nás !O nás !O nás !O nás !O nás !O nás !" +
-                "O nás !O nás !O nás !O nás !O nás !O nás !O nás !O nás !" +
-                "O nás !O nás !O nás !O nás !O nás !O nás !O nás !O nás !"
+                "Cílem této bakalářské práce je návrh pro vývoj mobilní aplikace, " +
+                "která by měla umožnit návštěvníkům muzeí elektronickou interpretaci informací o exponátech v jich zvoleném jazyce. " +
+                "Práce se zabývá vývojem a fungováním návrhu této aplikace, " +
+                "určena je pro mobilní telefony s operačním systémem Android."
 
         val expands: ExpandableTextView = view.findViewById(R.id.expand_text_view_become_translator)
         expands.text = "\n" +
                 "Aby jste mohli překládat texty pro ostatní uživatele, musíte se nejdříve zaregistrovat. " +
-                "K registraci můžete využít formulář na stránce profil, nebo jděte na stránky xyz.cz. " +
-                "Pokud již účet máte, na stránkách xyz.cz se přihlašte, v navigaci najdete možnost Překládat."
+                "K registraci můžete využít formulář na stránce profil, nebo jděte na stránky http://147.228.67.66/. " +
+                "Pokud již účet máte, na stránkách http://147.228.67.66/ se přihlašte, v navigaci najdete možnost Překládat."
 
 
         return view

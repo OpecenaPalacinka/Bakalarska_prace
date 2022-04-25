@@ -5,12 +5,15 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -19,7 +22,6 @@ import com.google.gson.Gson
 import com.mikhaellopez.circularimageview.CircularImageView
 import pelikan.bp.pelikanj.DBClient
 import pelikan.bp.pelikanj.R
-import pelikan.bp.pelikanj.ui.more.ImagePicker
 import pelikan.bp.pelikanj.viewModels.User
 import java.io.ByteArrayOutputStream
 
@@ -73,7 +75,7 @@ class LoggedUserFragment : Fragment() {
         }
 
         changeProfilePicture.setOnClickListener {
-            openImageChooser()
+            chooseProfilePicture()
         }
 
         favouriteInstitutions.setOnClickListener {
@@ -127,28 +129,77 @@ class LoggedUserFragment : Fragment() {
         profilePicture = view.findViewById(R.id.imageview_profile)
     }
 
-    private fun openImageChooser() {
-        val chooseImageIntent = ImagePicker.getPickImageIntent()
-        startActivityForResult(chooseImageIntent, 42)
+    private fun chooseProfilePicture() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val inflater = layoutInflater
+        val dialogView: View = inflater.inflate(R.layout.aler_dialog, null)
+
+        builder.setCancelable(true)
+        builder.setView(dialogView)
+
+        val imageViewADPPCamera: ImageView = dialogView.findViewById(R.id.imageViewADPPCamera)
+        val imageViewADPPGallery: ImageView = dialogView.findViewById(R.id.imageViewADPPGallery)
+        val alertDialogProfilePicture: AlertDialog = builder.create()
+
+        alertDialogProfilePicture.show()
+
+        imageViewADPPCamera.setOnClickListener {
+            takePictureFromCamera()
+            alertDialogProfilePicture.dismiss()
+
+        }
+        imageViewADPPGallery.setOnClickListener {
+            takePictureFromGallery()
+            alertDialogProfilePicture.dismiss()
+        }
+    }
+
+    private fun takePictureFromGallery() {
+        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(pickPhoto, 1)
+    }
+
+    private fun takePictureFromCamera() {
+        val takePicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (takePicture.resolveActivity(requireActivity().packageManager) != null) {
+            startActivityForResult(takePicture, 2)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                42 -> {
-                    val bm: Bitmap? = ImagePicker.getBitmapFromResult(requireView().context,resultCode,data)
-                    val baos = ByteArrayOutputStream()
-                    bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
-                    val image = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
-                    dbClient.updateProfilePicture(image)
-                    val decodedString: ByteArray = Base64.decode(image, Base64.DEFAULT)
-                    val decodedByte =
-                        BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-                    profilePicture.setImageBitmap(decodedByte)
-                }
+        when (requestCode) {
+            // CAMERA
+            1 -> if (resultCode == Activity.RESULT_OK) {
+                val selectedImageUri = data?.data
+                val bm = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, selectedImageUri)
+                val baos = ByteArrayOutputStream()
+                bm?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                val image = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
+                dbClient.updateProfilePicture(image)
+                val decodedString: ByteArray = Base64.decode(image, Base64.DEFAULT)
+                val decodedByte =
+                    BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                profilePicture.setImageBitmap(decodedByte)
+
+            }
+            // GALLERY
+            2 -> if (resultCode == Activity.RESULT_OK) {
+
+                val bundle = data?.extras
+                val bitmapImage = bundle!!["data"] as Bitmap?
+                val baos = ByteArrayOutputStream()
+                bitmapImage?.compress(Bitmap.CompressFormat.JPEG,100,baos)
+                val image = Base64.encodeToString(baos.toByteArray(),Base64.NO_WRAP)
+                dbClient.updateProfilePicture(image)
+                val decodedString: ByteArray = Base64.decode(image, Base64.DEFAULT)
+                val decodedByte =
+                    BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                profilePicture.setImageBitmap(decodedByte)
+
             }
         }
     }
+
 
 }

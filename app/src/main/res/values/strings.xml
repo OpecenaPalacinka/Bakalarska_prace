@@ -73,4 +73,6 @@
     <string name="no_translation">Neexistuje překlad ve vašem jazyce ani v angličtině</string>
     <string name="upload_failed">Nepodařilo se nahrát exponát</string>
     <string name="upload_successfull">Nahrání se zdařilo</string>
+    <string name="camera">Fotoaparát</string>
+    <string name="gallery">Galerie</string>
 </resources>
