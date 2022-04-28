@@ -78,6 +78,7 @@ class ScannerFragment : Fragment() {
             }
         }
 
+
         overbox.setOnClickListener {
             if (fromsmall.hasEnded()) {
                 setUpAnimation()

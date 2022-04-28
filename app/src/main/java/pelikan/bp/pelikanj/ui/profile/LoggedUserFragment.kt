@@ -53,6 +53,8 @@ class LoggedUserFragment : Fragment() {
 
         dbClient = DBClient(requireContext())
 
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+
         initLayout(view)
 
         setUpListeners()

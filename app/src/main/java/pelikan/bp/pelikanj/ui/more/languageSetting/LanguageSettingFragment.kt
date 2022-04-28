@@ -1,14 +1,20 @@
 package pelikan.bp.pelikanj.ui.more.languageSetting
 
 import android.animation.Animator
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -24,6 +30,7 @@ import pelikan.bp.pelikanj.R
 import java.util.ArrayList
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import pelikan.bp.pelikanj.DBClient
+import pelikan.bp.pelikanj.ui.findExhibit.PickExhibitFragment
 
 class LanguageSettingFragment : Fragment(), OnSelectListener {
 
@@ -39,6 +46,8 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
     lateinit var animation: LottieAnimationView
     lateinit var card: LinearLayout
     lateinit var overbox: LinearLayout
+
+    var heightOverbox: Int = 0
 
     lateinit var dbClient: DBClient
     private var navController: NavController?= null
@@ -67,6 +76,8 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
 
         displayItems(view)
 
+        heightOverbox = countHeight()
+
         searchLanguagesView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
 
@@ -80,6 +91,26 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         })
 
         return view
+    }
+
+    private fun countHeight(): Int{
+        val tv = TypedValue()
+        var actionBarHeight = 0
+        if (requireActivity().theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics)
+        }
+
+        val resource = requireContext().resources.getIdentifier("status_bar_height", "dimen", "android")
+        var statusBarHeight = 0
+        if (resource > 0) {
+            statusBarHeight = requireContext().resources.getDimensionPixelSize(resource)
+        }
+
+        val wm = requireContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val metrics = DisplayMetrics()
+        wm.defaultDisplay.getMetrics(metrics)
+
+        return metrics.heightPixels - (2 * actionBarHeight) - statusBarHeight
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -104,6 +135,10 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         card.alpha = 0F
         overbox.alpha = 0F
         animation.visibility = View.GONE
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = 0
+        overbox.layoutParams = params
     }
 
     private fun doAnimation() {
@@ -114,6 +149,10 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
 
         overbox.alpha = 1F
         overbox.startAnimation(fromnothing)
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = heightOverbox
+        overbox.layoutParams = params
 
         card.alpha = 1F
         card.startAnimation(fromsmall)
@@ -151,10 +190,13 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
 
         dbClient.updateLanguage(myLanguages.languageShort)
 
+        hideKeyboard()
+
         doAnimation()
 
         animation.addAnimatorListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
+                recyclerView.isClickable = false
             }
 
             override fun onAnimationEnd(animation: Animator) {
@@ -167,6 +209,14 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
             override fun onAnimationRepeat(animation: Animator) {
             }
         })
+    }
 
+    fun Fragment.hideKeyboard() {
+        view?.let { activity?.hideKeyboard(it) }
+    }
+
+    private fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

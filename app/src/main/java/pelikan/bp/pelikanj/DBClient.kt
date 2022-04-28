@@ -99,19 +99,22 @@ class DBClient(context: Context?) :
     }
 
     fun getAllUserData(): DatabaseModel?{
-        val model: DatabaseModel
+        var model: DatabaseModel? = null
         val db = this.readableDatabase
         val res = db.rawQuery("select * from UserData", null)
-        res.moveToFirst()
+
 
         if (res.count == 0){
             return null
         }
 
-        val lang = (res.getString(res.getColumnIndexOrThrow(LANGUAGE)))
-        val token = (res.getString(res.getColumnIndexOrThrow(TOKEN)))
-        val profilePicture = (res.getString(res.getColumnIndexOrThrow(PROFILEPICTURE)))
-        model = DatabaseModel(lang, token, profilePicture)
+        if (res.moveToFirst()){
+            val lang = (res.getString(res.getColumnIndexOrThrow(LANGUAGE)))
+            val token = (res.getString(res.getColumnIndexOrThrow(TOKEN)))
+            val profilePicture = (res.getString(res.getColumnIndexOrThrow(PROFILEPICTURE)))
+            model = DatabaseModel(lang, token, profilePicture)
+        }
+
 
         res.close()
         db.close()

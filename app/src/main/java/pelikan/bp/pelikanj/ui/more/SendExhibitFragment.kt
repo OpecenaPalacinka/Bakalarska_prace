@@ -1,7 +1,9 @@
 package pelikan.bp.pelikanj.ui.more
 
 import android.animation.Animator
+import android.app.Activity
 import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -15,6 +17,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -372,6 +375,7 @@ class SendExhibitFragment : Fragment() {
                 call: Call<ResponseBody?>,
                 response: Response<ResponseBody>
             ) {
+                hideKeyboard()
                 //Check if correct
                 if (response.code() == 201){
                     // Correct
@@ -727,6 +731,15 @@ class SendExhibitFragment : Fragment() {
 
             }
         }
+    }
+
+    fun Fragment.hideKeyboard() {
+        view?.let { activity?.hideKeyboard(it) }
+    }
+
+    private fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
 

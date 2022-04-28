@@ -1,6 +1,8 @@
 package pelikan.bp.pelikanj.ui.profile
 
 import android.animation.Animator
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.util.Base64
@@ -10,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -129,6 +132,7 @@ class ProfileFragment : Fragment() {
                 call: Call<TokenModel>,
                 response: Response<TokenModel>
             ) {
+                hideKeyboard()
                 if (response.code() == 200){
                     // OK
                     val fullToken = response.body()?.token!!
@@ -246,5 +250,13 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    fun Fragment.hideKeyboard() {
+        view?.let { activity?.hideKeyboard(it) }
+    }
+
+    private fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+    }
 
 }

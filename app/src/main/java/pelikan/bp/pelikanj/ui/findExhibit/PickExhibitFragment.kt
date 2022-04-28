@@ -1,5 +1,6 @@
 package pelikan.bp.pelikanj.ui.findExhibit
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -14,6 +15,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.text.HtmlCompat
@@ -219,9 +221,6 @@ class PickExhibitFragment : Fragment() {
 
         overbox.setOnClickListener {
             if (fromsmall.hasEnded()) {
-                val paramsScroll: ViewGroup.LayoutParams = parent.layoutParams
-                paramsScroll.height = heightScroll
-                parent.layoutParams = paramsScroll
                 setUpAnimation()
             }
         }
@@ -265,6 +264,7 @@ class PickExhibitFragment : Fragment() {
                 call: Call<ResponseBody>,
                 response: Response<ResponseBody>
             ) {
+                hideKeyboard()
                 if (response.code() == 200){
                     // Show translation
                     val resp: String = response.body()!!.string()
@@ -302,6 +302,7 @@ class PickExhibitFragment : Fragment() {
                     val resp: String = response.body()!!.string()
                     val body = Gson().fromJson(resp, Translation::class.java)
                     val text = body.translatedText
+                    heightScroll = scrollView.layoutParams.height
                     textView.text = HtmlCompat.fromHtml(text,HtmlCompat.FROM_HTML_MODE_LEGACY)
                     doAnimation()
 
@@ -310,6 +311,7 @@ class PickExhibitFragment : Fragment() {
                     // Try english
                     animation_failed_text.text = resources.getString(R.string.no_translation)
                     doAnimationFailed()
+                    heightScroll = scrollView.layoutParams.height
                     resetForm()
                     cardF.y -= scrollView.scrollY
                     animationF.y -= scrollView.scrollY
@@ -664,6 +666,8 @@ class PickExhibitFragment : Fragment() {
         params.height = heightOverbox
         overbox.layoutParams = params
 
+        scrollView.scrollY = 0
+
         cardF.alpha = 1F
         cardF.y += scrollView.scrollY.toFloat()
         cardF.startAnimation(fromsmall)
@@ -715,6 +719,15 @@ class PickExhibitFragment : Fragment() {
 
         parent = view.findViewById(R.id.main_parent)
 
+    }
+
+    fun Fragment.hideKeyboard() {
+        view?.let { activity?.hideKeyboard(it) }
+    }
+
+    private fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
 }

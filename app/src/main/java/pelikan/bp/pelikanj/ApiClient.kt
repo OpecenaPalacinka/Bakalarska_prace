@@ -50,7 +50,7 @@ interface ApiClient {
 
     @GET("/location/showcases/all/{roomId}")
     fun getShowcases(@Path("roomId") roomId: Int): Call<List<Showcase>>
-    
+
     companion object {
 
         private const val BASE_URL = "http://147.228.67.66/"
