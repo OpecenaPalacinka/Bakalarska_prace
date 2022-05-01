@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">pelikanj</string>
+    <string name="app_name">Průvodce institucemi</string>
     <string name="title_scanner_fragment">Čtečka</string>
     <string name="title_profile_fragment">Profil</string>
     <string name="title_more_fragment">Více</string>
@@ -24,7 +24,7 @@
     <string name="image_with_exhibit_info_label">Obrázek s textem k exponátu</string>
     <string name="building_name_or_number">Jméno/číslo budovy</string>
     <string name="room_number">Jméno/číslo místnosti</string>
-    <string name="showcase_name_or_number">Jméno/číslo vytrýny</string>
+    <string name="showcase_name_or_number">Jméno/číslo vitrýny</string>
     <string name="requiredNameOfExhibit">Jméno exponátu musí být vyplněno</string>
     <string name="requiredNameOfBuilding">Jméno budovy musí být vyplněno</string>
     <string name="requiredNameOfRoom">Jméno místnosti musí být vyplněno</string>

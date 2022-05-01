@@ -1,23 +1,15 @@
 package pelikan.bp.pelikanj.ui.more
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.ms.square.android.expandabletextview.ExpandableTextView
 import kotlinx.android.synthetic.main.fragment_more.*
-import pelikan.bp.pelikanj.ApiClient
 import pelikan.bp.pelikanj.R
-import pelikan.bp.pelikanj.viewModels.InstitutionsModelItem
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MoreFragment : Fragment() {
 

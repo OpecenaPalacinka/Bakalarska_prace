@@ -5,17 +5,17 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
+import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -51,6 +51,10 @@ class RegistrationFragment : Fragment() {
     lateinit var cardF: LinearLayout
     private var navController: NavController ?= null
 
+    var heightOverbox: Int = 0
+
+    private lateinit var scrollView: ScrollView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,8 +73,11 @@ class RegistrationFragment : Fragment() {
 
         setUpAnimation()
 
+        heightOverbox = countHeight()
+
         registrationButton.setOnClickListener {
             if(checkFormValues()){
+                hideKeyboard()
                 sendRegistration()
             }
         }
@@ -84,8 +91,28 @@ class RegistrationFragment : Fragment() {
 
     }
 
+    private fun countHeight(): Int{
+        val tv = TypedValue()
+        var actionBarHeight = 0
+        if (requireActivity().theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics)
+        }
+
+        val resource = requireContext().resources.getIdentifier("status_bar_height", "dimen", "android")
+        var statusBarHeight = 0
+        if (resource > 0) {
+            statusBarHeight = requireContext().resources.getDimensionPixelSize(resource)
+        }
+
+        val wm = requireContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val metrics = DisplayMetrics()
+        wm.defaultDisplay.getMetrics(metrics)
+
+        return metrics.heightPixels - (2 * actionBarHeight) - statusBarHeight
+    }
+
     private fun sendRegistration() {
-        val user: User = User(usernameInput.editText?.text.toString(),
+        val user = User(usernameInput.editText?.text.toString(),
                              passwordInput.editText?.text.toString(),
                              emailInput.editText?.text.toString())
 
@@ -96,7 +123,6 @@ class RegistrationFragment : Fragment() {
                 call: Call<ResponseBody?>,
                 response: Response<ResponseBody?>
             ) {
-                hideKeyboard()
                 if (response.code() == 201){
                     doAnimation()
                     animation.addAnimatorListener(object : Animator.AnimatorListener {
@@ -156,6 +182,12 @@ class RegistrationFragment : Fragment() {
 
         card.alpha = 1F
         card.startAnimation(fromsmall)
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = heightOverbox
+        overbox.layoutParams = params
+
+        scrollView.scrollY = 0
     }
 
     private fun doAnimationFailed() {
@@ -169,6 +201,12 @@ class RegistrationFragment : Fragment() {
 
         cardF.alpha = 1F
         cardF.startAnimation(fromsmall)
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = heightOverbox
+        overbox.layoutParams = params
+
+        scrollView.scrollY = 0
     }
 
     private fun setUpAnimation() {
@@ -181,6 +219,10 @@ class RegistrationFragment : Fragment() {
         overbox.alpha = 0F
         animation.visibility = View.GONE
         animationF.visibility = View.GONE
+
+        val params: ViewGroup.LayoutParams = overbox.layoutParams
+        params.height = 0
+        overbox.layoutParams = params
 
     }
 
@@ -200,6 +242,8 @@ class RegistrationFragment : Fragment() {
         cardF = view.findViewById(R.id.popup_failed)
 
         overbox = view.findViewById(R.id.overbox)
+
+        scrollView = view.findViewById(R.id.registration_fragment_scrollView)
 
         val animationText: TextView = view.findViewById(R.id.animation_success_text)
         animationText.text = resources.getString(R.string.registration_successfull)

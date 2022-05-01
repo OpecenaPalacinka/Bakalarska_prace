@@ -33,7 +33,8 @@ interface ApiClient {
     fun loginUser(@Body user: UserLogin): Call<TokenModel>
 
     @PUT("/users/updatePassword")
-    fun updatePassword(@Header("Authorization") token: String, @Body password: PasswordModel): Call<ResponseBody>
+    fun updatePassword(@Header("Authorization") token: String,
+                       @Body password: PasswordModel): Call<ResponseBody>
 
     @GET("/users/token")
     fun updateToken(@Header("Authorization") token: String): Call<TokenModel>
