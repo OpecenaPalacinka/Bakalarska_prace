@@ -22,13 +22,22 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
+/**
+ * Main activity
+ *
+ * @constructor Create empty Main activity
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     val institutionsList = ArrayList<InstitutionsModelItem>()
     private lateinit var dbClient: DBClient
 
+    /**
+     * On create
+     *
+     * @param savedInstanceState
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,16 +46,20 @@ class MainActivity : AppCompatActivity() {
 
         dbClient = DBClient(applicationContext)
 
+        // Check if there is a row for user data in local database
+        // if not, add default data
         val userData = dbClient.getAllUserData()
-
         if (userData == null){
             dbClient.insertDefaultData("cs",null,null)
         }
 
+        // Check permission for camera
         checkPermission(Manifest.permission.CAMERA,42)
 
+        // Get institution list and add it to local database
         getInstitutions()
 
+        // Check permission for external storage
         checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,43)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -87,8 +100,12 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
+    /**
+     * Updates token of logged user
+     *
+     * @param token Token from server
+     */
     private fun updateToken(token: String) {
-
         val client: Call<TokenModel> = ApiClient.create().updateToken(token)
 
         client.enqueue(object : Callback<TokenModel> {
@@ -110,7 +127,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getInstitutions(): ArrayList<InstitutionsModelItem> {
+    /**
+     * Get list of institutions from server database
+     */
+    private fun getInstitutions() {
         val client: Call<List<InstitutionsModelItem>> = ApiClient.create().getInstitutions()
 
         client.enqueue(object : Callback<List<InstitutionsModelItem>> {
@@ -129,10 +149,14 @@ class MainActivity : AppCompatActivity() {
                 Log.println(Log.ERROR,"error","Error when getting institutions!")
             }
         })
-
-        return institutionsList
     }
 
+    /**
+     * Check for permission (Camera, external storage etc...)
+     *
+     * @param permission name of permission
+     * @param requestCode request code
+     */
     private fun checkPermission(permission: String, requestCode: Int) {
         if (ContextCompat.checkSelfPermission(this@MainActivity, permission) == PackageManager.PERMISSION_DENIED) {
             // Requesting the permission
@@ -140,6 +164,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    /**
+     * On request permissions result check
+     *
+     * @param requestCode request code
+     * @param permissions list of permissions
+     * @param grantResults list of results
+     */
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
                                             grantResults: IntArray) {

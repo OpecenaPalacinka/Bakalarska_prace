@@ -54,7 +54,14 @@ class InstitutionsFragment : Fragment() {
 
     private lateinit var listView: ListView
 
-
+    /**
+     * On create view
+     *
+     * @param inflater inflater
+     * @param container container
+     * @param savedInstanceState savedInstanceState
+     * @return view
+     */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view : View = inflater.inflate(R.layout.institutions_fragment, container, false)
 
@@ -65,6 +72,7 @@ class InstitutionsFragment : Fragment() {
         initInstitutions(view)
 
         val dbClient = DBClient(requireContext())
+
         institutionsList = dbClient.getAllInstitutions()
 
         fillInstitutions()
@@ -78,6 +86,7 @@ class InstitutionsFragment : Fragment() {
         return view
     }
 
+    /** Set up listeners */
     private fun setUpListeners(){
         listView.setOnItemClickListener { _, _, position, _ ->
 
@@ -87,7 +96,6 @@ class InstitutionsFragment : Fragment() {
             institutionNameCard.text = institutionsName[position]
             institutionAddressCard.text = institutionsAddress[position]
             institutionDescriptionCard.text = institutionsDescriptions[position]
-
         }
 
         overbox.setOnClickListener {
@@ -98,6 +106,7 @@ class InstitutionsFragment : Fragment() {
 
     }
 
+    /** Get images of all institutions */
     private fun getInstitutionImages() {
         for (imageName in institutionsImagesStrings){
             val client: Call<ResponseBody> = ApiClient.create().getImage(imageName.value)
@@ -118,6 +127,7 @@ class InstitutionsFragment : Fragment() {
         }
     }
 
+    /** Do animation with institution card */
     private fun doAnimation() {
         imageIcon.visibility = View.VISIBLE
         imageIcon.startAnimation(foricon)
@@ -135,6 +145,7 @@ class InstitutionsFragment : Fragment() {
 
     }
 
+    /** Set up animation */
     private fun setUpAnimation() {
         fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
         fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
@@ -149,6 +160,11 @@ class InstitutionsFragment : Fragment() {
         overbox.layoutParams = params
     }
 
+    /**
+     * Init all xml tags
+     *
+     * @param view view
+     */
     private fun initInstitutions(view: View) {
         listView = view.findViewById(R.id.institutions)
         card = view.findViewById(R.id.popup)
@@ -159,8 +175,8 @@ class InstitutionsFragment : Fragment() {
         institutionDescriptionCard = view.findViewById(R.id.institution_description_card)
     }
 
+    /** Fill lists with important data then get images*/
     private fun fillInstitutions() {
-
         for (respo: InstitutionsModelItem in institutionsList) {
             institutionsName.add(respo.name)
             institutionsAddress.add(respo.address)
@@ -169,18 +185,25 @@ class InstitutionsFragment : Fragment() {
         }
         setupInstitutions()
         getInstitutionImages()
-
     }
 
+    /** Setup institutions and add them to list view */
     private fun setupInstitutions() {
         val boldText = StyleSpan(android.graphics.Typeface.BOLD)
+
+        // Iterate through all institutions
         for (i in 0 until institutionsName.size) {
             val hm = HashMap<String, SpannableStringBuilder>()
             val ssb = SpannableStringBuilder(resources.getString(R.string.address) + ": "+institutionsAddress[i])
             ssb.setSpan(boldText,0,6,Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+
+            // Institution name
             hm["institution_name"] = SpannableStringBuilder().append("       : " + institutionsName[i])
+            // Institution address
             hm["address"] = ssb
+            // Icon of building
             hm["image"] = SpannableStringBuilder().append(R.drawable.ic_baseline_location_city_24_gray.toString())
+
             aList.add(hm)
         }
 
@@ -188,7 +211,7 @@ class InstitutionsFragment : Fragment() {
 
         val to = intArrayOf(R.id.image, R.id.institution_name, R.id.address)
 
-        val adapter: SimpleAdapter =
+        val adapter =
             SimpleAdapter(activity?.baseContext, aList, R.layout.institutions_fragment, from, to)
         listView.adapter = adapter
     }

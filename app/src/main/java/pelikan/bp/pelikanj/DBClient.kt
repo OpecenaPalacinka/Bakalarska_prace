@@ -6,13 +6,21 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import pelikan.bp.pelikanj.viewModels.*
 
-
+/**
+ * Database client
+ *
+ * @constructor
+ * @param context
+ */
 class DBClient(context: Context?) :
     SQLiteOpenHelper(context, DBName, null, 3) {
 
-
+    /**
+     * When database is created
+     *
+     * @param sqLiteDatabase database
+     */
     override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
-
         sqLiteDatabase.execSQL(
             "create table UserData" +
                     "(id integer primary key autoincrement, language text, token text, profilePicture text)"
@@ -39,6 +47,13 @@ class DBClient(context: Context?) :
         )
     }
 
+    /**
+     * When new version of database is implemented
+     *
+     * @param sqLiteDatabase database
+     * @param oldVersion number of old version
+     * @param newVersion number of new version
+     */
     override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS UserData")
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Institutions")
@@ -48,6 +63,14 @@ class DBClient(context: Context?) :
         onCreate(sqLiteDatabase)
     }
 
+    /**
+     * Insert default data to UserData table
+     *
+     * @param language language for user (default is 'cs')
+     * @param token user token (default null - not logged)
+     * @param profilePicture encoded profile picture (default null)
+     * @return
+     */
     fun insertDefaultData(language: String?, token: String?, profilePicture: String?): Boolean {
         val db = this.writableDatabase
         val contentValues = ContentValues()
@@ -59,6 +82,11 @@ class DBClient(context: Context?) :
         return true
     }
 
+    /**
+     * Update language in UserData table
+     *
+     * @param language two char code of language
+     */
     fun updateLanguage(language: String){
         val db = this.writableDatabase
         val values = ContentValues()
@@ -72,6 +100,12 @@ class DBClient(context: Context?) :
         res.close()
     }
 
+    /**
+     * Update token in UserData table
+     *
+     * @param token user token or null
+     * null when user log out
+     */
     fun updateToken(token: String?){
         val db = this.writableDatabase
         val values = ContentValues()
@@ -85,6 +119,12 @@ class DBClient(context: Context?) :
         res.close()
     }
 
+    /**
+     * Update profile picture in UserData table
+     * Profile picture is encoded with Base64 string
+     *
+     * @param profilePicture encoded profile picture
+     */
     fun updateProfilePicture(profilePicture: String){
         val db = this.writableDatabase
         val values = ContentValues()
@@ -98,6 +138,12 @@ class DBClient(context: Context?) :
         res.close()
     }
 
+    /**
+     * Get all user data
+     *
+     * @return User credentials or null
+     * null when no row in db, usually first start of app
+     */
     fun getAllUserData(): DatabaseModel?{
         var model: DatabaseModel? = null
         val db = this.readableDatabase
@@ -115,13 +161,17 @@ class DBClient(context: Context?) :
             model = DatabaseModel(lang, token, profilePicture)
         }
 
-
         res.close()
         db.close()
         return model
     }
 
-    fun insertAllInstitutions(institutions: ArrayList<InstitutionsModelItem>): Boolean {
+    /**
+     * Insert all institutions
+     *
+     * @param institutions list of institutions to be added
+     */
+    fun insertAllInstitutions(institutions: ArrayList<InstitutionsModelItem>) {
         val db = this.writableDatabase
         db.delete(INSTITUTIONSTABLENAME,null,null)
         val values = ContentValues()
@@ -137,9 +187,13 @@ class DBClient(context: Context?) :
             db.insert(INSTITUTIONSTABLENAME,null,values)
         }
         db.close()
-        return true
     }
 
+    /**
+     * Get all institutions from local database
+     *
+     * @return list of institutions
+     */
     fun getAllInstitutions(): ArrayList<InstitutionsModelItem> {
         val db = this.readableDatabase
         val res = db.rawQuery("select * from Institutions", null)
@@ -165,6 +219,11 @@ class DBClient(context: Context?) :
         return institutions
     }
 
+    /**
+     * Insert all buildings (not yet used)
+     *
+     * @param buildings list of buildings to be added
+     */
     fun insertAllBuildings(buildings: ArrayList<Building>){
         val db = this.writableDatabase
         db.delete(BUILDINGSTABLENAME,null,null)
@@ -180,6 +239,11 @@ class DBClient(context: Context?) :
         db.close()
     }
 
+    /**
+     * Get all buildings (not yet used)
+     *
+     * @return list of buildings
+     */
     fun getAllBuildings(): ArrayList<Building>{
         val db = this.readableDatabase
         val res = db.rawQuery("select * from Buildings", null)
@@ -202,6 +266,11 @@ class DBClient(context: Context?) :
         return buildings
     }
 
+    /**
+     * Insert all rooms (not yet used)
+     *
+     * @param rooms list of rooms to be added
+     */
     fun insertAllRooms(rooms: ArrayList<Room>){
         val db = this.writableDatabase
         db.delete(ROOMSTABLENAME,null,null)
@@ -217,6 +286,11 @@ class DBClient(context: Context?) :
         db.close()
     }
 
+    /**
+     * Get all rooms (not yet used)
+     *
+     * @return list of rooms
+     */
     fun getAllRooms(): ArrayList<Room>{
         val db = this.readableDatabase
         val res = db.rawQuery("select * from Rooms", null)
@@ -239,6 +313,11 @@ class DBClient(context: Context?) :
         return rooms
     }
 
+    /**
+     * Insert all showcases (not yet used)
+     *
+     * @param showcases list of showcases to be added
+     */
     fun insertAllShowcases(showcases: ArrayList<Showcase>){
         val db = this.writableDatabase
         db.delete(SHOWCASESTABLENAME,null,null)
@@ -255,6 +334,11 @@ class DBClient(context: Context?) :
         db.close()
     }
 
+    /**
+     * Get all showcases (not yet used)
+     *
+     * @return list of showcases
+     */
     fun getAllShowcases(): ArrayList<Showcase>{
         val db = this.readableDatabase
         val res = db.rawQuery("select * from Showcases", null)

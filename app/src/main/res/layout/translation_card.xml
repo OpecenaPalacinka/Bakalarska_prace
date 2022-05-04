@@ -12,7 +12,7 @@
     <LinearLayout
         android:id="@+id/popup_translation"
         android:layout_width="340dp"
-        android:layout_height="match_parent"
+        android:layout_height="350dp"
         android:layout_marginStart="25dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="25dp"

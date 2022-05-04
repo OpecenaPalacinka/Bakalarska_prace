@@ -52,11 +52,25 @@ class ChangePasswordFragment : Fragment() {
     private lateinit var dbClient: DBClient
     private var navController: NavController?= null
 
+    /**
+     * On create
+     *
+     * @param savedInstanceState savedInstanceState
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Remove back arrow on top bar
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
+    /**
+     * On create view
+     *
+     * @param inflater inflater
+     * @param container container
+     * @param savedInstanceState savedInstanceState
+     * @return
+     */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_change_password, container, false)
 
@@ -80,24 +94,38 @@ class ChangePasswordFragment : Fragment() {
         return view
     }
 
+    /**
+     * On view created (init nav controller)
+     *
+     * @param view view
+     * @param savedInstanceState savedInstanceState
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
-
     }
 
+    /**
+     * Get user token
+     *
+     * @return
+     */
     private fun getTokenForChange(): String {
         val userData = dbClient.getAllUserData()
 
         return userData?.token!!
     }
 
+    /**
+     * Send request to server
+     */
     private fun updatePassword(){
 
         val password = PasswordModel(passwordInput.editText?.text.toString())
 
         val token = getTokenForChange()
 
+        // This request need and authorization so token is needed
         val client: Call<ResponseBody> = ApiClient.create().updatePassword(token,password)
 
         client.enqueue(object : Callback<ResponseBody> {
@@ -113,14 +141,11 @@ class ChangePasswordFragment : Fragment() {
                     animation.addAnimatorListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {
                         }
-
                         override fun onAnimationEnd(animation: Animator) {
                             navController?.navigate(R.id.action_change_password_to_navigation_profile)
                         }
-
                         override fun onAnimationCancel(animation: Animator) {
                         }
-
                         override fun onAnimationRepeat(animation: Animator) {
                         }
                     })
@@ -131,16 +156,13 @@ class ChangePasswordFragment : Fragment() {
                     animationF.addAnimatorListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {
                         }
-
                         override fun onAnimationEnd(animation: Animator) {
                             passwordInput.editText?.text = Editable.Factory.getInstance().newEditable("")
                             passwordAgainInput.editText?.text = Editable.Factory.getInstance().newEditable("")
                             setUpAnimation()
                         }
-
                         override fun onAnimationCancel(animation: Animator) {
                         }
-
                         override fun onAnimationRepeat(animation: Animator) {
                         }
                     })
@@ -154,6 +176,11 @@ class ChangePasswordFragment : Fragment() {
         })
     }
 
+    /**
+     * Init all xml tags
+     *
+     * @param view view
+     */
     private fun initForm(view: View) {
         passwordInput = view.findViewById(R.id.password)
         passwordAgainInput = view.findViewById(R.id.password_again)
@@ -175,6 +202,9 @@ class ChangePasswordFragment : Fragment() {
         animationTextF.text = resources.getString(R.string.change_password_failed)
     }
 
+    /**
+     * When password is changed successfully
+     */
     private fun doAnimation() {
         animation.visibility = View.VISIBLE
         animation.startAnimation(foricon)
@@ -188,6 +218,9 @@ class ChangePasswordFragment : Fragment() {
         card.startAnimation(fromsmall)
     }
 
+    /**
+     * When change of password is failed (should not happen)
+     */
     private fun doAnimationFailed() {
         animationF.visibility = View.VISIBLE
         animationF.startAnimation(foricon)
@@ -201,6 +234,9 @@ class ChangePasswordFragment : Fragment() {
         cardF.startAnimation(fromsmall)
     }
 
+    /**
+     * Set ups animations
+     */
     private fun setUpAnimation() {
         fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
         fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
@@ -214,6 +250,11 @@ class ChangePasswordFragment : Fragment() {
 
     }
 
+    /**
+     * Check if form is correctly filled
+     *
+     * @return true = ok, false = one or more fields are not valid
+     */
     private fun checkFormValues():Boolean {
         if (!validatePassword() or !validatePasswordAgain()){
             return false
@@ -221,6 +262,11 @@ class ChangePasswordFragment : Fragment() {
         return true
     }
 
+    /**
+     * Validate password
+     *
+     * @return true = ok, false = problem (empty, too long, too short, does not match regex)
+     */
     private fun validatePassword(): Boolean {
         val passwordString: String = passwordInput.editText?.text.toString()
 
@@ -243,6 +289,11 @@ class ChangePasswordFragment : Fragment() {
         }
     }
 
+    /**
+     * Validate password "again"
+     *
+     * @return true = ok, false = problem (empty, not equals)
+     */
     private fun validatePasswordAgain(): Boolean {
         val passwordAgainString: String = passwordAgainInput.editText?.text.toString()
 
@@ -260,10 +311,16 @@ class ChangePasswordFragment : Fragment() {
         }
     }
 
+    /** Hide keyboard */
     fun Fragment.hideKeyboard() {
         view?.let { activity?.hideKeyboard(it) }
     }
 
+    /**
+     * Hide keyboard
+     *
+     * @param view view
+     */
     private fun Context.hideKeyboard(view: View) {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)

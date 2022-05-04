@@ -15,38 +15,42 @@ class MoreFragment : Fragment() {
 
     private var navControler: NavController?= null
 
-
+    /**
+     * On create view
+     *
+     * @param inflater inflater
+     * @param container container
+     * @param savedInstanceState savedInstanceState
+     * @return
+     */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view:View = inflater.inflate(R.layout.fragment_more, container, false)
 
         val expand: ExpandableTextView = view.findViewById(R.id.expand_text_view_about_us)
-        expand.text = "\n" +
-                "Cílem této bakalářské práce je návrh pro vývoj mobilní aplikace, " +
-                "která by měla umožnit návštěvníkům muzeí elektronickou interpretaci informací o exponátech v jich zvoleném jazyce. " +
-                "Práce se zabývá vývojem a fungováním návrhu této aplikace, " +
-                "určena je pro mobilní telefony s operačním systémem Android."
+        expand.text = resources.getString(R.string.about_us_textView)
 
         val expands: ExpandableTextView = view.findViewById(R.id.expand_text_view_become_translator)
-        expands.text = "\n" +
-                "Aby jste mohli překládat texty pro ostatní uživatele, musíte se nejdříve zaregistrovat. " +
-                "K registraci můžete využít formulář na stránce profil, nebo jděte na stránky http://147.228.67.66/. " +
-                "Pokud již účet máte, na stránkách http://147.228.67.66/ se přihlašte, v navigaci najdete možnost Překládat."
-
+        expands.text = resources.getString(R.string.about_us_becomeTranslator)
 
         return view
     }
 
-
+    /**
+     * On view created
+     *
+     * @param view view
+     * @param savedInstanceState savedInstanceState
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navControler = Navigation.findNavController(view)
+
         sendExhibit.setOnClickListener{
             navControler?.navigate(R.id.action_navigation_more_to_send_exhibit)
         }
+
         language_settings.setOnClickListener {
             navControler?.navigate(R.id.action_navigation_more_to_language_settings)
         }
-
     }
-
 }

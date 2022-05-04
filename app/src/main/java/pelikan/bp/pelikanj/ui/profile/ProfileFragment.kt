@@ -40,20 +40,27 @@ class ProfileFragment : Fragment() {
 
     lateinit var usernameInput: TextInputLayout
     lateinit var passwordInput: TextInputLayout
-    lateinit var buttonRegister: Button
-    lateinit var buttonLogin: Button
+    private lateinit var buttonRegister: Button
+    private lateinit var buttonLogin: Button
 
     lateinit var animationF: LottieAnimationView
     lateinit var frameLayout: FrameLayout
-    lateinit var fromsmall: Animation
-    lateinit var fromnothing: Animation
-    lateinit var foricon: Animation
+    private lateinit var fromsmall: Animation
+    private lateinit var fromnothing: Animation
+    private lateinit var foricon: Animation
     lateinit var overbox: LinearLayout
-    lateinit var cardF: LinearLayout
+    private lateinit var cardF: LinearLayout
 
     lateinit var dbClient: DBClient
 
-
+    /**
+     * On create view
+     *
+     * @param inflater inflater
+     * @param container container
+     * @param savedInstanceState savedInstanceState
+     * @return
+     */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_profile, container, false)
 
@@ -66,21 +73,29 @@ class ProfileFragment : Fragment() {
         return view
     }
 
+    /**
+     * On view created
+     *
+     * @param view view
+     * @param savedInstanceState savedInstanceState
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navControler = Navigation.findNavController(view)
 
         val userData = dbClient.getAllUserData()
 
+        // Check user token
         if (userData?.token != null){
 
+            // This code is commented in MainActivity.kt
             val onlyToken = userData.token!!.substring(7, userData.token!!.length)
             val tokens = onlyToken.split(".")[1]
             val jwt = Base64.decode(tokens, Base64.DEFAULT)
             val info = String(jwt, Charsets.UTF_8)
             val authors = Gson().fromJson(info, TokenData::class.java)
 
-            // Not expired
+            // If not expired, move him to his profile screen
             if (authors.exp >= (System.currentTimeMillis() / 1000).toInt()){
                 navControler?.navigate(R.id.action_navigation_profile_to_navigation_logged_user)
             }
@@ -104,6 +119,11 @@ class ProfileFragment : Fragment() {
 
     }
 
+    /**
+     * Init xml tags
+     *
+     * @param view view
+     */
     private fun initForm(view: View) {
         usernameInput = view.findViewById(R.id.username)
         passwordInput = view.findViewById(R.id.password)
@@ -119,6 +139,9 @@ class ProfileFragment : Fragment() {
         animationTextF.text = resources.getString(R.string.login_failed)
     }
 
+    /**
+     * Request server, login user
+     */
     private fun loginUser(){
         val userN = usernameInput.editText?.text.toString()
         val userP = passwordInput.editText?.text.toString()
@@ -142,7 +165,8 @@ class ProfileFragment : Fragment() {
                     navControler?.navigate(R.id.action_navigation_profile_to_navigation_logged_user)
                 } else {
                     // Wrong credentials
-                        doAnimationFailed()
+                    doAnimationFailed()
+                    // setup form for next try to login
                     animationF.addAnimatorListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {
                             usernameInput.isFocusableInTouchMode = false
@@ -180,6 +204,9 @@ class ProfileFragment : Fragment() {
         })
     }
 
+    /**
+     * Do animation, when login failed
+     */
     private fun doAnimationFailed() {
         animationF.visibility = View.VISIBLE
         animationF.startAnimation(foricon)
@@ -193,6 +220,9 @@ class ProfileFragment : Fragment() {
         cardF.startAnimation(fromsmall)
     }
 
+    /**
+     * Set up animation
+     */
     private fun setUpAnimation() {
         fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
         fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
@@ -204,6 +234,9 @@ class ProfileFragment : Fragment() {
 
     }
 
+    /**
+     * Check if form is OK
+     */
     private fun checkValues():Boolean {
         if (!validateUsername() or !validatePassword()) {
             return false
@@ -211,7 +244,11 @@ class ProfileFragment : Fragment() {
         return true
     }
 
-
+    /**
+     * Validate if username is valid
+     *
+     * @return true = ok, false = problem (empty, too long, too short)
+     */
     private fun validateUsername(): Boolean {
         val usernameString: String = usernameInput.editText?.text.toString()
 
@@ -231,6 +268,11 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    /**
+     * Validate if password is valid
+     *
+     * @return true = ok, false = problem (empty, too long, too short)
+     */
     private fun validatePassword(): Boolean {
         val passwordString: String = passwordInput.editText?.text.toString()
 
@@ -250,10 +292,16 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    /** Hide keyboard */
     fun Fragment.hideKeyboard() {
         view?.let { activity?.hideKeyboard(it) }
     }
 
+    /**
+     * Hide keyboard
+     *
+     * @param view view
+     */
     private fun Context.hideKeyboard(view: View) {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)

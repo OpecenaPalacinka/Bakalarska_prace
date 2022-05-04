@@ -75,4 +75,16 @@
     <string name="upload_successfull">Nahrání se zdařilo</string>
     <string name="camera">Fotoaparát</string>
     <string name="gallery">Galerie</string>
+    <string name="title_registration_fragment">Registrace</string>
+
+    <string name="about_us_textView">\n
+                Cílem této bakalářské práce je návrh pro vývoj mobilní aplikace,
+                která by měla umožnit návštěvníkům muzeí elektronickou interpretaci informací o exponátech v jich zvoleném jazyce.
+                Práce se zabývá vývojem a fungováním návrhu této aplikace,
+                určena je pro mobilní telefony s operačním systémem Android.</string>
+    <string name="about_us_becomeTranslator">\n
+                Aby jste mohli překládat texty pro ostatní uživatele, musíte se nejdříve zaregistrovat.
+                K registraci můžete využít formulář na stránce profil, nebo jděte na stránky http://147.228.67.66/.
+                Pokud již účet máte, na stránkách http://147.228.67.66/ se přihlašte, v navigaci najdete možnost Překládat.</string>
+    <string name="wrong_code">QR kód obsahuje nevalidní hodnoty</string>
 </resources>

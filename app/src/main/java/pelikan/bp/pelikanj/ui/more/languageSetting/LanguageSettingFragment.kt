@@ -3,64 +3,72 @@ package pelikan.bp.pelikanj.ui.more.languageSetting
 import android.animation.Animator
 import android.app.Activity
 import android.content.Context
+import android.graphics.Insets
+import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.util.TypedValue
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
-import pelikan.bp.pelikanj.R
-import java.util.ArrayList
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import pelikan.bp.pelikanj.DBClient
-import pelikan.bp.pelikanj.ui.findExhibit.PickExhibitFragment
+import pelikan.bp.pelikanj.R
+import pelikan.bp.pelikanj.viewModels.MyLanguages
 
 class LanguageSettingFragment : Fragment(), OnSelectListener {
 
     lateinit var recyclerView: RecyclerView
-    lateinit var myLanguages: ArrayList<MyLanguages>
-    lateinit var customAdapter: CustomAdapter
-    lateinit var searchLanguagesView: SearchView
+    private lateinit var myLanguages: ArrayList<MyLanguages>
+    private lateinit var customAdapter: CustomAdapter
+    private lateinit var searchLanguagesView: SearchView
 
     lateinit var frameLayout: FrameLayout
-    lateinit var fromsmall: Animation
-    lateinit var fromnothing: Animation
-    lateinit var foricon: Animation
-    lateinit var animation: LottieAnimationView
+    private lateinit var fromsmall: Animation
+    private lateinit var fromnothing: Animation
+    private lateinit var foricon: Animation
+    private lateinit var animation: LottieAnimationView
     lateinit var card: LinearLayout
     lateinit var overbox: LinearLayout
 
-    var heightOverbox: Int = 0
+    private var heightOverbox: Int = 0
 
     lateinit var dbClient: DBClient
     private var navController: NavController?= null
 
+    /**
+     * On create
+     *
+     * @param savedInstanceState savedInstanceState
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        // removes back arrow on top bar
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
-
+    /**
+     * On create view
+     *
+     * @param inflater inflater
+     * @param container container
+     * @param savedInstanceState savedInstanceState
+     * @return
+     */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        var view = inflater.inflate(R.layout.fragment_language_setting, container, false)
+        val view = inflater.inflate(R.layout.fragment_language_setting, container, false)
 
         frameLayout = view.findViewById(R.id.language_settings_fragment)
 
@@ -79,11 +87,12 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         heightOverbox = countHeight()
 
         searchLanguagesView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            // Submit is ignored
             override fun onQueryTextSubmit(query: String?): Boolean {
-
                 return false
             }
 
+            // On change call filter
             override fun onQueryTextChange(newText: String): Boolean {
                 filter(newText)
                 return true
@@ -93,6 +102,22 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         return view
     }
 
+    /**
+     * On view created (only init nav controller)
+     *
+     * @param view view
+     * @param savedInstanceState savedInstanceState
+     */
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        navController = Navigation.findNavController(view)
+    }
+
+    /**
+     * Function counts the height of screen, no top bar, no navigation bar
+     *
+     * @return height of screen
+     */
     private fun countHeight(): Int{
         val tv = TypedValue()
         var actionBarHeight = 0
@@ -106,18 +131,25 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
             statusBarHeight = requireContext().resources.getDimensionPixelSize(resource)
         }
 
-        val wm = requireContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val metrics = DisplayMetrics()
-        wm.defaultDisplay.getMetrics(metrics)
-
-        return metrics.heightPixels - (2 * actionBarHeight) - statusBarHeight
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowMetrics = requireActivity().windowManager.currentWindowMetrics
+            val insets: Insets = windowMetrics.windowInsets
+                .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+            // return API level 30+
+            windowMetrics.bounds.height() - insets.bottom - insets.top - (2 * actionBarHeight)
+        } else {
+            val displayMetrics = DisplayMetrics()
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            // return API level 29-
+            displayMetrics.heightPixels - (2 * actionBarHeight) - statusBarHeight
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(view)
-    }
-
+    /**
+     * Init all xml tags and text
+     *
+     * @param view view
+     */
     private fun initForm(view: View) {
         overbox = view.findViewById(R.id.overbox)
         animation = view.findViewById(R.id.animationSuccess)
@@ -127,6 +159,9 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         animationText.text = resources.getString(R.string.change_successfull)
     }
 
+    /**
+     * Set up the animation
+     */
     private fun setUpAnimation() {
         fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
         fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
@@ -141,6 +176,9 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         overbox.layoutParams = params
     }
 
+    /**
+     * Do animation when change was successful
+     */
     private fun doAnimation() {
         animation.visibility = View.VISIBLE
         animation.startAnimation(foricon)
@@ -158,6 +196,12 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         card.startAnimation(fromsmall)
     }
 
+    /**
+     * Filter right options only
+     * Called everytime user input a char or deletes a char
+     *
+     * @param newText new text from user
+     */
     private fun filter(newText: String) {
         val filteredList = ArrayList<MyLanguages>()
 
@@ -166,9 +210,15 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
                 filteredList.add(item)
             }
         }
+
         customAdapter.filterList(filteredList)
     }
 
+    /**
+     * Display items in recycler view
+     *
+     * @param view view
+     */
     private fun displayItems(view: View) {
         recyclerView = view.findViewById(R.id.recycler_view)
         recyclerView.setHasFixedSize(true)
@@ -176,6 +226,7 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
 
         myLanguages = ArrayList()
 
+        // Get items from .csv file (same languages as on server)
         csvReader().open(resources.openRawResource(R.raw.language_codes)) {
             readAllAsSequence().forEach { row ->
                 myLanguages.add(MyLanguages(row[1], row[0]))
@@ -186,6 +237,11 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
         recyclerView.adapter = customAdapter
     }
 
+    /**
+     * Update user language and do the animation after users clicks on item
+     *
+     * @param myLanguages item clicked
+     */
     override fun onItemClicked(myLanguages: MyLanguages) {
 
         dbClient.updateLanguage(myLanguages.languageShort)
@@ -198,23 +254,26 @@ class LanguageSettingFragment : Fragment(), OnSelectListener {
             override fun onAnimationStart(animation: Animator) {
                 recyclerView.isClickable = false
             }
-
             override fun onAnimationEnd(animation: Animator) {
                 navController?.navigate(R.id.action_language_settings_to_navigation_more)
             }
-
             override fun onAnimationCancel(animation: Animator) {
             }
-
             override fun onAnimationRepeat(animation: Animator) {
             }
         })
     }
 
-    fun Fragment.hideKeyboard() {
+    /** Hide keyboard */
+    private fun Fragment.hideKeyboard() {
         view?.let { activity?.hideKeyboard(it) }
     }
 
+    /**
+     * Hide keyboard
+     *
+     * @param view view
+     */
     private fun Context.hideKeyboard(view: View) {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)

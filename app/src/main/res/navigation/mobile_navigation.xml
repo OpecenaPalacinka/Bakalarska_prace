@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_scanner">
+    app:startDestination="@+id/navigation_institutions">
 
     <fragment
         android:id="@+id/navigation_scanner"
@@ -95,7 +95,7 @@
     <fragment
         android:id="@+id/navigation_registration"
         android:name="pelikan.bp.pelikanj.ui.profile.RegistrationFragment"
-        android:label="@string/title_profile_fragment"
+        android:label="@string/title_registration_fragment"
         tools:layout="@layout/fragment_registration" >
         <action
             android:id="@+id/action_navigation_logged_user_to_navigation_profile"

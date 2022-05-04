@@ -3,15 +3,14 @@ package pelikan.bp.pelikanj.ui.profile
 import android.animation.Animator
 import android.app.Activity
 import android.content.Context
+import android.graphics.Insets
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.TypedValue
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
@@ -37,30 +36,44 @@ class RegistrationFragment : Fragment() {
     lateinit var usernameInput: TextInputLayout
     lateinit var passwordInput: TextInputLayout
     lateinit var passwordAgainInput: TextInputLayout
-    lateinit var registrationButton: Button
+    private lateinit var registrationButton: Button
     lateinit var animation: LottieAnimationView
     lateinit var animationF: LottieAnimationView
     lateinit var frameLayout: FrameLayout
 
 
-    lateinit var fromsmall: Animation
-    lateinit var fromnothing: Animation
-    lateinit var foricon: Animation
+    private lateinit var fromsmall: Animation
+    private lateinit var fromnothing: Animation
+    private lateinit var foricon: Animation
     lateinit var overbox: LinearLayout
     lateinit var card: LinearLayout
-    lateinit var cardF: LinearLayout
+    private lateinit var cardF: LinearLayout
     private var navController: NavController ?= null
 
-    var heightOverbox: Int = 0
+    private var heightOverbox: Int = 0
 
     private lateinit var scrollView: ScrollView
 
+    /**
+     * On create
+     *
+     * @param savedInstanceState savedInstanceState
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Removes back arrow
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
+    /**
+     * On create view
+     *
+     * @param inflater inflater
+     * @param container container
+     * @param savedInstanceState savedInstanceState
+     * @return view
+     */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view: View = inflater.inflate(R.layout.fragment_registration, container, false)
 
@@ -85,12 +98,23 @@ class RegistrationFragment : Fragment() {
         return view
     }
 
+    /**
+     * On view created
+     * Only initialize navigation controller
+     *
+     * @param view view
+     * @param savedInstanceState savedInstanceState
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
-
     }
 
+    /**
+     * Function counts the height of screen, no top bar, no navigation bar
+     *
+     * @return height of screen
+     */
     private fun countHeight(): Int{
         val tv = TypedValue()
         var actionBarHeight = 0
@@ -104,13 +128,24 @@ class RegistrationFragment : Fragment() {
             statusBarHeight = requireContext().resources.getDimensionPixelSize(resource)
         }
 
-        val wm = requireContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val metrics = DisplayMetrics()
-        wm.defaultDisplay.getMetrics(metrics)
-
-        return metrics.heightPixels - (2 * actionBarHeight) - statusBarHeight
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowMetrics = requireActivity().windowManager.currentWindowMetrics
+            val insets: Insets = windowMetrics.windowInsets
+                .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+            // return API level 30+
+            windowMetrics.bounds.height() - insets.bottom - insets.top - (2 * actionBarHeight)
+        } else {
+            val displayMetrics = DisplayMetrics()
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            // return API level 29-
+            displayMetrics.heightPixels - (2 * actionBarHeight) - statusBarHeight
+        }
     }
 
+    /**
+     * Uses retrofit to send registration request to server
+     * Does animation after getting response
+     */
     private fun sendRegistration() {
         val user = User(usernameInput.editText?.text.toString(),
                              passwordInput.editText?.text.toString(),
@@ -140,12 +175,11 @@ class RegistrationFragment : Fragment() {
                         }
                     })
                 } else {
-                        // Wrong code
+                    // Wrong code
                     doAnimationFailed()
                     animationF.addAnimatorListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {
                         }
-
                         override fun onAnimationEnd(animation: Animator) {
                             emailInput.editText?.text = Editable.Factory.getInstance().newEditable("")
                             usernameInput.editText?.text = Editable.Factory.getInstance().newEditable("")
@@ -153,15 +187,12 @@ class RegistrationFragment : Fragment() {
                             passwordAgainInput.editText?.text = Editable.Factory.getInstance().newEditable("")
                             setUpAnimation()
                         }
-
                         override fun onAnimationCancel(animation: Animator) {
                         }
-
                         override fun onAnimationRepeat(animation: Animator) {
                         }
                     })
                     }
-
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
@@ -171,6 +202,7 @@ class RegistrationFragment : Fragment() {
 
     }
 
+    /** Do successful animation */
     private fun doAnimation() {
         animation.visibility = View.VISIBLE
         animation.startAnimation(foricon)
@@ -190,6 +222,7 @@ class RegistrationFragment : Fragment() {
         scrollView.scrollY = 0
     }
 
+    /** Do animation failed */
     private fun doAnimationFailed() {
         animationF.visibility = View.VISIBLE
         animationF.startAnimation(foricon)
@@ -202,6 +235,7 @@ class RegistrationFragment : Fragment() {
         cardF.alpha = 1F
         cardF.startAnimation(fromsmall)
 
+        // set height of black "background"
         val params: ViewGroup.LayoutParams = overbox.layoutParams
         params.height = heightOverbox
         overbox.layoutParams = params
@@ -209,6 +243,7 @@ class RegistrationFragment : Fragment() {
         scrollView.scrollY = 0
     }
 
+    /** Set up animation and hide all components*/
     private fun setUpAnimation() {
         fromsmall = AnimationUtils.loadAnimation(context,R.anim.fromsmall)
         fromnothing = AnimationUtils.loadAnimation(context,R.anim.fromnothing)
@@ -227,6 +262,11 @@ class RegistrationFragment : Fragment() {
     }
 
 
+    /**
+     * Init all xml tags
+     *
+     * @param view view
+     */
     private fun initForm(view: View) {
         usernameInput = view.findViewById(R.id.username)
         emailInput = view.findViewById(R.id.email)
@@ -252,6 +292,11 @@ class RegistrationFragment : Fragment() {
         animationTextF.text = resources.getString(R.string.registration_failed)
     }
 
+    /**
+     * Check form values
+     *
+     * @return true = ok, false = one or more are not valid
+     */
     private fun checkFormValues():Boolean {
         if (!validateUsername() or !validateEmail() or !validatePassword() or !validatePasswordAgain()){
             return false
@@ -259,6 +304,11 @@ class RegistrationFragment : Fragment() {
         return true
     }
 
+    /**
+     * Validates input in username field
+     *
+     * @return true = ok, false = problem (empty, too long, too short)
+     */
     private fun validateUsername(): Boolean {
         val usernameString: String = usernameInput.editText?.text.toString()
 
@@ -278,9 +328,14 @@ class RegistrationFragment : Fragment() {
         }
     }
 
+    /**
+     * Validate input in email field
+     *
+     * @return true = ok, false = problem (empty, not a valid email adress)
+     */
     private fun validateEmail(): Boolean{
         val emailString: String = emailInput.editText?.text.toString()
-        val regex: String = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        val regex = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
 
         if (emailString.isEmpty()){
             emailInput.error = resources.getString(R.string.requiredEmail)
@@ -295,6 +350,11 @@ class RegistrationFragment : Fragment() {
         }
     }
 
+    /**
+     * Validates input in password field
+     *
+     * @return true = ok, false = problem (empty, too long, too short, not matches regex -> at least one small and big char and a digit)
+     */
     private fun validatePassword(): Boolean {
         val passwordString: String = passwordInput.editText?.text.toString()
 
@@ -317,6 +377,11 @@ class RegistrationFragment : Fragment() {
         }
     }
 
+    /**
+     * Validates input in password again field
+     *
+     * @return true = ok, false = problem (empty, not equals)
+     */
     private fun validatePasswordAgain(): Boolean {
         val passwordAgainString: String = passwordAgainInput.editText?.text.toString()
 
@@ -334,10 +399,16 @@ class RegistrationFragment : Fragment() {
         }
     }
 
-    fun Fragment.hideKeyboard() {
+    /** Hide keyboard */
+    private fun Fragment.hideKeyboard() {
         view?.let { activity?.hideKeyboard(it) }
     }
 
+    /**
+     * Hide keyboard
+     *
+     * @param view view
+     */
     private fun Context.hideKeyboard(view: View) {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
