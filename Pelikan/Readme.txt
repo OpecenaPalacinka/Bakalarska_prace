@@ -1,0 +1,3 @@
+Složka "Text_prace" obsahuje zdrojový soubor .docx, ze kterého se generuje pdf soubor. Text bakalářské práce byl psán v programu Microsoft Word. Také obsahuje výsledný .pdf soubor.
+
+"Aplikace_a_knihovny" obsahuje tři podsložky, ve složce "spustitelny_soubor" se nalézají dva soubory, které jsou potřeba pro správnou instalaci aplikace. "zdrojove_soubory" obsahují zdrojové soubory aplikace, v této složce se dá využít příkaz "gradlew assembleDebug", který vygeneruje nový spustitelný soubor. Ten se nachází ve složce "app/build/outputs/apk/debug/". Dále se v kořenové složce nachází složka "generovana_dokumentace", kde je vygenerovaná dokumentace k celé aplikaci (dokumentace neobsahuje private metody a proměnné).
